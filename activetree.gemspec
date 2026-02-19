@@ -9,14 +9,14 @@ Gem::Specification.new do |spec|
   spec.email = ["alex.ford@babylist.com"]
 
   spec.summary = "A tree-based admin interface for Rails applications"
-  spec.homepage = "https://github.com/alexford/activetree"
+  spec.homepage = "https://github.com/babylist/activetree"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1"
 
   spec.metadata["rubygems_mfa_required"] = "true"
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/alexford/activetree"
-  spec.metadata["changelog_uri"] = "https://github.com/alexford/activetree/blob/main/CHANGELOG.md"
+  spec.metadata["source_code_uri"] = "https://github.com/babylist/activetree"
+  spec.metadata["changelog_uri"] = "https://github.com/babylist/activetree/blob/main/CHANGELOG.md"
 
   gemspec = File.basename(__FILE__)
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|

@@ -1,38 +1,66 @@
-# Activetree
+# ActiveTree 🌳
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/activetree`. To experiment with that code, run `bin/console` for an interactive prompt.
+A tree-based admin interface for ActiveRecord. ActiveTree renders an interactive TUI (terminal UI) showing model hierarchies, associations, and column types.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add to your application's Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
-
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+```ruby
+gem "activetree"
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+Then run:
 
 ```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+bundle install
 ```
 
 ## Usage
 
-TODO: Write usage instructions here
+### Standalone (TUI)
+
+Run the executable directly to launch the terminal interface:
+
+```bash
+bundle exec activetree
+```
+
+Without an ActiveRecord connection, a placeholder tree is displayed. Connect to a Rails app to see your actual models.
+
+### Within a Rails app
+
+ActiveTree ships with a Railtie that registers automatically. Launch the TUI via rake:
+
+```bash
+bin/rails activetree:tree
+```
+
+### Configuration
+
+```ruby
+ActiveTree.configure do |config|
+  config.excluded_models = ["ApplicationRecord", "ActiveStorage::Blob"]
+  config.max_depth = 5
+end
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `excluded_models` | `[]` | Model names to hide from the tree |
+| `max_depth` | `3` | Maximum nesting depth for associations |
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```bash
+bin/setup            # Install dependencies
+bundle exec rspec    # Run tests
+bundle exec rubocop  # Lint
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/activetree.
+Bug reports and pull requests are welcome on GitHub at https://github.com/alexford/activetree.
 
 ## License
 
