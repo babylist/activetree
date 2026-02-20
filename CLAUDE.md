@@ -10,16 +10,6 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 
 ## Architecture
 
-```
-lib/activetree.rb           # Main entry, autoloads, config DSL, conditional Railtie require
-lib/activetree/version.rb   # ActiveTree::VERSION
-lib/activetree/configuration.rb  # excluded_models, max_depth
-lib/activetree/railtie.rb   # Rails::Railtie — rake task, config hook
-lib/activetree/cli.rb       # TUI entry point (tty-box, tty-tree, tty-prompt, etc.)
-lib/activetree/tree_builder.rb   # Model discovery + nested hash for TTY::Tree
-exe/activetree              # Standalone executable
-```
-
 **Engine upgrade path:** The Railtie is designed to swap its superclass to `Rails::Engine`, add `isolate_namespace`, and gain `config/routes.rb` + `app/` directories. Existing initializer and rake blocks transfer unchanged.
 
 ## Code style

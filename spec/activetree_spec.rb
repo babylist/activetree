@@ -8,21 +8,12 @@ RSpec.describe ActiveTree do
   describe ActiveTree::Configuration do
     subject(:config) { described_class.new }
 
-    it "defaults excluded_models to an empty array" do
-      expect(config.excluded_models).to eq([])
-    end
-
     it "defaults max_depth to 3" do
       expect(config.max_depth).to eq(3)
     end
 
     it "defaults default_limit to 25" do
       expect(config.default_limit).to eq(25)
-    end
-
-    it "allows setting excluded_models" do
-      config.excluded_models = ["User"]
-      expect(config.excluded_models).to eq(["User"])
     end
 
     it "allows setting max_depth" do

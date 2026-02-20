@@ -6,7 +6,6 @@ module ActiveTree
   class Error < StandardError; end
 
   autoload :CLI, "activetree/cli"
-  autoload :TreeBuilder, "activetree/tree_builder"
   autoload :Configuration, "activetree/configuration"
   autoload :Model, "activetree/model"
   autoload :TreeNode, "activetree/tree_node"
