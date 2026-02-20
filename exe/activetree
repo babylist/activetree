@@ -4,4 +4,4 @@
 require "activetree"
 require "activetree/cli"
 
-ActiveTree::CLI.start
+ActiveTree::CLI.start(ARGV)

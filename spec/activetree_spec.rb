@@ -16,6 +16,10 @@ RSpec.describe ActiveTree do
       expect(config.max_depth).to eq(3)
     end
 
+    it "defaults default_limit to 25" do
+      expect(config.default_limit).to eq(25)
+    end
+
     it "allows setting excluded_models" do
       config.excluded_models = ["User"]
       expect(config.excluded_models).to eq(["User"])
@@ -24,6 +28,11 @@ RSpec.describe ActiveTree do
     it "allows setting max_depth" do
       config.max_depth = 5
       expect(config.max_depth).to eq(5)
+    end
+
+    it "allows setting default_limit" do
+      config.default_limit = 50
+      expect(config.default_limit).to eq(50)
     end
   end
 

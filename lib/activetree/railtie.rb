@@ -8,9 +8,9 @@ module ActiveTree
 
     rake_tasks do
       namespace :activetree do
-        desc "Launch the ActiveTree TUI"
-        task tree: :environment do
-          ActiveTree::CLI.start
+        desc "Launch the ActiveTree TUI — usage: rake activetree:tree[Model,id]"
+        task :tree, %i[model id] => :environment do |_t, args|
+          ActiveTree::CLI.start([args[:model], args[:id]].compact)
         end
       end
     end

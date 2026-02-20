@@ -8,6 +8,14 @@ module ActiveTree
   autoload :CLI, "activetree/cli"
   autoload :TreeBuilder, "activetree/tree_builder"
   autoload :Configuration, "activetree/configuration"
+  autoload :Model, "activetree/model"
+  autoload :TreeNode, "activetree/tree_node"
+  autoload :RecordNode, "activetree/record_node"
+  autoload :AssociationGroupNode, "activetree/association_group_node"
+  autoload :LoadMoreNode, "activetree/load_more_node"
+  autoload :TreeState, "activetree/tree_state"
+  autoload :Renderer, "activetree/renderer"
+  autoload :InputHandler, "activetree/input_handler"
 
   class << self
     def config
