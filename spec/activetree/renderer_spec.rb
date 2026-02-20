@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "active_support/concern"
-require "tty-box"
-require "tty-table"
 require "tty-screen"
 require "pastel"
 
@@ -43,9 +41,8 @@ RSpec.describe ActiveTree::Renderer do
       expect(output).to include("quit")
     end
 
-    it "includes Tree and Details pane headers" do
-      expect(output).to include("Tree")
-      expect(output).to include("Details")
+    it "includes selected record info in detail pane header" do
+      expect(output).to include("[User] User #42")
     end
 
     it "starts with cursor home escape sequence" do

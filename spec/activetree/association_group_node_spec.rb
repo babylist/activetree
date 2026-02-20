@@ -3,6 +3,11 @@
 require "active_support/concern"
 
 RSpec.describe ActiveTree::AssociationGroupNode do
+  let(:tree_state) do
+    root_node = double("RootNode", record: double("RootRecord"))
+    double("TreeState", root: root_node)
+  end
+
   let(:reflection) { double("Reflection", macro: :has_many) }
   let(:child_record) { double("ChildRecord", id: 1, class: double(name: "Item")) }
 
@@ -25,18 +30,19 @@ RSpec.describe ActiveTree::AssociationGroupNode do
       record: parent_record,
       association_name: :items,
       reflection: reflection,
+      tree_state: tree_state,
       depth: 1
     )
   end
 
   describe "#label" do
-    it "shows association name and macro before loading" do
-      expect(node.label).to eq("items (has_many)")
+    it "shows association name before loading" do
+      expect(node.label).to eq(:items)
     end
 
     it "shows count after loading" do
       node.load_children!
-      expect(node.label).to eq("items (has_many) [1]")
+      expect(node.label).to eq("items [1]")
     end
   end
 
@@ -78,6 +84,7 @@ RSpec.describe ActiveTree::AssociationGroupNode do
         record: paginated_record,
         association_name: :items,
         reflection: reflection,
+        tree_state: tree_state,
         depth: 1
       )
     end
@@ -110,6 +117,7 @@ RSpec.describe ActiveTree::AssociationGroupNode do
         record: owner_record,
         association_name: :user,
         reflection: singular_reflection,
+        tree_state: tree_state,
         depth: 1
       )
     end

@@ -1,6 +1,6 @@
 # ActiveTree
 
-A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a TUI using the tty-* toolkit; planned evolution into a mountable Rails Engine.
+A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a split-pane TUI rendered with raw ANSI escape codes, tty-screen, and Pastel; planned evolution into a mountable Rails Engine.
 
 ## Naming
 
@@ -9,6 +9,8 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 - Never use `Activetree` (that's what `bundle gem` scaffolds, and we renamed it)
 
 ## Architecture
+
+**Runtime architecture:** CLI → TreeState → Renderer loop. TreeState owns a tree of nodes (`TreeNode` base → `RecordNode`, `AssociationGroupNode`, `LoadMoreNode`). The `ActiveTree::Model` concern provides per-model DSL (`tree_fields`, `tree_children`, `tree_label`). InputHandler reads raw keypresses; Renderer composes a full-screen frame each tick using ANSI escape codes and Pastel for color.
 
 **Engine upgrade path:** The Railtie is designed to swap its superclass to `Rails::Engine`, add `isolate_namespace`, and gain `config/routes.rb` + `app/` directories. Existing initializer and rake blocks transfer unchanged.
 
@@ -24,11 +26,11 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 - `spec.files` uses `git ls-files` — new files must be git-tracked before `gem build` will include them
 - Model discovery uses `config.after_initialize` (not `initializer`) because models aren't fully loaded during Rails initialization in development
 - `Gemfile.lock` is committed (Bundler recommends tracking it for gems and apps alike)
-- tty-box uses `:light` border style (`:round` is not valid in 0.7.x)
+- Several tty-* gems (`tty-box`, `tty-table`, `tty-tree`, `tty-prompt`, `tty-cursor`) remain in the gemspec but are not currently imported — `pastel` is used directly but only declared transitively. Reconcile before publishing.
 
 ## Dependencies
 
-Runtime: `activerecord >= 7.0`, `railties >= 7.0`, `tty-tree`, `tty-prompt`, `tty-table`, `tty-box`, `tty-screen`, `tty-cursor`
+Runtime: `activerecord >= 7.0`, `railties >= 7.0`, `tty-screen`, `pastel`
 Dev: `rspec`, `rubocop`, `rake`, `irb`
 
 ## Commands

@@ -3,6 +3,11 @@
 require "active_support/concern"
 
 RSpec.describe ActiveTree::RecordNode do
+  let(:tree_state) do
+    root_node = double("RootNode", record: double("RootRecord"))
+    double("TreeState", root: root_node)
+  end
+
   describe "with mixin record" do
     let(:record_class) do
       Class.new do
@@ -41,7 +46,7 @@ RSpec.describe ActiveTree::RecordNode do
       instance
     end
 
-    let(:node) { described_class.new(record: record) }
+    let(:node) { described_class.new(record: record, tree_state: tree_state) }
 
     it "uses tree_node_label for label" do
       expect(node.label).to eq("Order #7")
@@ -81,7 +86,7 @@ RSpec.describe ActiveTree::RecordNode do
     end
 
     let(:record) { record_class.new }
-    let(:node) { described_class.new(record: record) }
+    let(:node) { described_class.new(record: record, tree_state: tree_state) }
 
     it "falls back to all columns for detail_fields" do
       expect(node.detail_fields).to eq(%i[id name email])
@@ -94,11 +99,10 @@ RSpec.describe ActiveTree::RecordNode do
 
   describe "without mixin" do
     let(:record) do
-      obj = double("PlainRecord", id: 1, class: double(name: "Widget"))
-      obj
+      double("PlainRecord", id: 1, class: double(name: "Widget"))
     end
 
-    let(:node) { described_class.new(record: record) }
+    let(:node) { described_class.new(record: record, tree_state: tree_state) }
 
     it "uses default label format" do
       expect(node.label).to eq("Widget #1")
@@ -117,7 +121,7 @@ RSpec.describe ActiveTree::RecordNode do
     let(:record) do
       double("Record", id: 1, class: double(name: "Leaf"))
     end
-    let(:node) { described_class.new(record: record) }
+    let(:node) { described_class.new(record: record, tree_state: tree_state) }
 
     it "returns self when not expanded" do
       expect(node.visible_nodes).to eq([node])
