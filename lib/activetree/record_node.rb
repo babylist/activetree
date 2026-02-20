@@ -42,6 +42,10 @@ module ActiveTree
       end
     end
 
+    def record?
+      true
+    end
+
     private
 
     def configured_children

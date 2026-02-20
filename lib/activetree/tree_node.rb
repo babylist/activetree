@@ -22,6 +22,10 @@ module ActiveTree
       raise NotImplementedError, "#{self.class}#label"
     end
 
+    def record?
+      false
+    end
+
     def visible_nodes
       nodes = [self]
       if expanded && expandable?

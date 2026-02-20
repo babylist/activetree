@@ -7,7 +7,7 @@ module ActiveTree
   class Renderer
     TREE_WIDTH_RATIO = 0.4
     MIN_TREE_WIDTH = 25
-    CHROME_LINES = 6 # top border + header + pane title + pane bottom + footer + bottom border
+    CHROME_LINES = 5 # top border + header + pane title + pane bottom + footer + bottom border
 
     def initialize(tree_state)
       @state = tree_state
@@ -27,14 +27,14 @@ module ActiveTree
       @inner = @width - 2
       @tree_w = [(@width * TREE_WIDTH_RATIO).to_i, MIN_TREE_WIDTH].max
       @detail_w = @inner - @tree_w
-      @content_h = TTY::Screen.height - CHROME_LINES
+      @content_h = TTY::Screen.height - CHROME_LINES - 3
     end
 
     def render_frame
       tree_lines = render_tree_lines(@tree_w - 1, @content_h)
       detail_lines = render_detail_lines(@detail_w, @content_h)
 
-      top_border + header_row +
+      top_border +
         pane_title_border +
         pane_content_rows(tree_lines, detail_lines) +
         pane_bottom_border + footer_row + bottom_border
@@ -42,20 +42,17 @@ module ActiveTree
 
     def top_border
       border = "\u2500" * @inner
-      border[1, 12] = " ActiveTree "
-      "\u250c#{border}\u2510\n"
-    end
 
-    def header_row
-      text = " Tree-based admin interface v#{ActiveTree::VERSION}"
-      "\u2502#{text.ljust(@inner)}\u2502\n"
+      insert!(border, "#{app_name} - ActiveTree v#{ActiveTree::VERSION}")
+      "\u250c#{border}\u2510\n"
     end
 
     def pane_title_border
       tree_border = "\u2500" * (@tree_w - 1)
       detail_border = "\u2500" * @detail_w
-      tree_border[1, 6] = " Tree "
-      detail_border[1, 9] = " Details "
+
+      insert!(tree_border, "Tree", at: 1)
+      insert!(detail_border, @state.selected_record_node&.label || "Details", at: 1)
       "\u251c#{tree_border}\u252c#{detail_border}\u2524\n"
     end
 
@@ -79,8 +76,19 @@ module ActiveTree
       end_idx = [start_idx + height, visible.size].min
 
       (start_idx...end_idx).map do |i|
-        line = format_tree_node(visible[i], width)
-        i == @state.cursor_index ? @pastel.inverse(line) : line
+        node = visible[i]
+        line = format_tree_node(node, width)
+
+        # inverse if highlighted in tree
+        line = @pastel.inverse(line) if i == @state.cursor_index
+
+        # cyan if not a record
+        line = @pastel.cyan(line) unless node.record?
+
+        # bold if selected (details visible)
+        line = @pastel.bold(line) if node == @state.selected_record_node
+
+        line
       end
     end
 
@@ -123,6 +131,16 @@ module ActiveTree
       return str if str.length <= max_length
 
       "#{str[0...(max_length - 1)]}\u2026"
+    end
+
+    def app_name
+      Rails.application.class.module_parent_name
+    rescue StandardError => e
+      "Rails App"
+    end
+
+    def insert!(original, to_insert, at: 1)
+      original[at, to_insert.length] = to_insert
     end
   end
 end
