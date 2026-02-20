@@ -4,8 +4,8 @@ module ActiveTree
   class LoadMoreNode < TreeNode
     attr_reader :group
 
-    def initialize(group:, depth: 0, parent: nil)
-      super(depth: depth, parent: parent)
+    def initialize(group:, tree_state:, depth: 0, parent: nil)
+      super(depth: depth, parent: parent, tree_state:)
       @group = group
     end
 

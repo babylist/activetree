@@ -6,7 +6,7 @@ module ActiveTree
     attr_accessor :visible_height
 
     def initialize(root_record:)
-      @root = RecordNode.new(record: root_record)
+      @root = RecordNode.new(record: root_record, tree_state: self)
       @root.expanded = true
       @cursor_index = 0
       @scroll_offset = 0
@@ -47,6 +47,17 @@ module ActiveTree
     def select_current
       node = cursor_node
       @selected_record_node = node if node.is_a?(RecordNode)
+    end
+
+    def make_selected_record_root
+      node = selected_record_node
+      return unless node.is_a?(RecordNode)
+
+      @root = RecordNode.new(record: node.record, tree_state: self)
+      @root.expanded = true
+      @selected_record_node = @root
+      @cursor_index = 0
+      @scroll_offset = 0
     end
 
     private

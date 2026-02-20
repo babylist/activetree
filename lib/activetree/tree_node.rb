@@ -4,10 +4,11 @@ module ActiveTree
   class TreeNode
     attr_accessor :depth, :parent, :expanded
 
-    def initialize(depth: 0, parent: nil)
+    def initialize(tree_state:, depth: 0, parent: nil)
       @depth = depth
       @parent = parent
       @expanded = false
+      @tree_state = tree_state
     end
 
     def expandable?

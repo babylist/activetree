@@ -27,7 +27,7 @@ module ActiveTree
       @inner = @width - 2
       @tree_w = [(@width * TREE_WIDTH_RATIO).to_i, MIN_TREE_WIDTH].max
       @detail_w = @inner - @tree_w
-      @content_h = TTY::Screen.height - CHROME_LINES - 3
+      @content_h = TTY::Screen.height - CHROME_LINES
     end
 
     def render_frame
@@ -37,23 +37,22 @@ module ActiveTree
       top_border +
         pane_title_border +
         pane_content_rows(tree_lines, detail_lines) +
-        pane_bottom_border + footer_row + bottom_border
+        pane_bottom_border + footer_row
     end
 
     def top_border
-      border = "\u2500" * @inner
-
-      insert!(border, "#{app_name} - ActiveTree v#{ActiveTree::VERSION}")
-      "\u250c#{border}\u2510\n"
+      @pastel.magenta.bold("ActiveTree v#{ActiveTree::VERSION}\n") + @pastel.dim("#{app_name}\n")
     end
 
     def pane_title_border
       tree_border = "\u2500" * (@tree_w - 1)
-      detail_border = "\u2500" * @detail_w
+      detail_border = ("\u2500" * @detail_w)
 
-      insert!(tree_border, "Tree", at: 1)
-      insert!(detail_border, @state.selected_record_node&.label || "Details", at: 1)
-      "\u251c#{tree_border}\u252c#{detail_border}\u2524\n"
+      # insert!(tree_border, app_name || "Tree", at: 1)
+
+      details_label = "[#{@state.selected_record_node&.class_label}] #{@state.selected_record_node&.label}"
+      insert!(detail_border, details_label, at: 1)
+      "\u250c#{tree_border}\u252c#{detail_border}\u2510\n"
     end
 
     def pane_content_rows(tree_lines, detail_lines)
@@ -67,7 +66,7 @@ module ActiveTree
     end
 
     def pane_bottom_border
-      "\u251c#{"\u2500" * (@tree_w - 1)}\u2534#{"\u2500" * @detail_w}\u2524\n"
+      "\u2514#{"\u2500" * (@tree_w - 1)}\u2534#{"\u2500" * @detail_w}\u2518\n"
     end
 
     def render_tree_lines(width, height)
@@ -84,6 +83,9 @@ module ActiveTree
 
         # cyan if not a record
         line = @pastel.cyan(line) unless node.record?
+
+        # italic if it is the root node
+        line = @pastel.italic(line) if node.record? && node.record == @state.root.record
 
         # bold if selected (details visible)
         line = @pastel.bold(line) if node == @state.selected_record_node
@@ -108,17 +110,21 @@ module ActiveTree
 
       selected.detail_pairs.map do |field, value|
         field_str = @pastel.bold(field.to_s.ljust(15))
-        " #{field_str} #{truncate(value.to_s, width - 18)}"
+
+        value_str = case value
+                    when true, false
+                      value ? @pastel.green("✓") : @pastel.red("✗")
+                    else
+                      truncate(value.to_s, width - 18)
+                    end
+
+        " #{field_str} #{value_str}"
       end.first(height)
     end
 
     def footer_row
-      help = " \u2191\u2193 navigate  Space expand/collapse  Enter select  q quit "
-      "\u2502#{@pastel.inverse(help.center(@inner))}\u2502\n"
-    end
-
-    def bottom_border
-      "\u2514#{"\u2500" * @inner}\u2518\n"
+      help = " \u2191\u2193 navigate  Space expand/collapse  Enter select  r Make selected root  q quit "
+      "#{@pastel.magenta.inverse(help.center(@width))}"
     end
 
     def ansi_ljust(str, width)
@@ -134,13 +140,15 @@ module ActiveTree
     end
 
     def app_name
-      Rails.application.class.module_parent_name
-    rescue StandardError => e
+      "#{Rails.application.class.module_parent_name} (#{Rails.env})"
+    rescue StandardError
       "Rails App"
     end
 
     def insert!(original, to_insert, at: 1)
-      original[at, to_insert.length] = to_insert
+      with_spacing = " #{to_insert} "
+
+      original[at, with_spacing.length] = with_spacing
     end
   end
 end

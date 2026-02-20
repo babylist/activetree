@@ -4,8 +4,8 @@ module ActiveTree
   class AssociationGroupNode < TreeNode
     attr_reader :record, :association_name, :reflection
 
-    def initialize(record:, association_name:, reflection:, depth: 0, parent: nil)
-      super(depth: depth, parent: parent)
+    def initialize(record:, association_name:, reflection:, tree_state:, depth: 0, parent: nil)
+      super(depth: depth, parent: parent, tree_state:)
       @record = record
       @association_name = association_name
       @reflection = reflection
@@ -16,12 +16,11 @@ module ActiveTree
     end
 
     def label
-      macro = reflection.macro
-      if @loaded
+      if @loaded && !singular?
         count_str = @has_more ? "#{@offset}+" : child_record_count.to_s
-        "#{association_name} (#{macro}) [#{count_str}]"
+        "#{association_name} [#{count_str}]"
       else
-        "#{association_name} (#{macro})"
+        association_name
       end
     end
 
@@ -90,11 +89,11 @@ module ActiveTree
 
     def append_record_nodes(records)
       records.each { |rec| @children << build_record_node(rec) }
-      @children << LoadMoreNode.new(group: self, depth: depth + 1, parent: self) if @has_more
+      @children << LoadMoreNode.new(group: self, depth: depth + 1, parent: self, tree_state: @tree_state) if @has_more
     end
 
     def build_record_node(rec)
-      RecordNode.new(record: rec, depth: depth + 1, parent: self)
+      RecordNode.new(record: rec, depth: depth + 1, parent: self, tree_state: @tree_state)
     end
 
     def child_record_count

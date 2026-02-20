@@ -44,6 +44,7 @@ module ActiveTree
       when :move_down then state.move_down
       when :toggle_expand then state.toggle_expand
       when :select then state.select_current
+      when :make_root then state.make_selected_record_root
       end
     end
 
