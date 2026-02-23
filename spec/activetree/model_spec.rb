@@ -33,6 +33,12 @@ RSpec.describe ActiveTree::Model do
       fields = model_class.tree_configuration.fields
       expect(fields.keys).to eq(%i[id name email])
     end
+
+    it "accepts options per field" do
+      model_class.tree_fields :id, { name: { label: "Full Name" } }
+      field = model_class.tree_configuration.fields[:name]
+      expect(field.label).to eq("Full Name")
+    end
   end
 
   describe ".tree_field" do
@@ -43,7 +49,7 @@ RSpec.describe ActiveTree::Model do
     end
 
     it "accepts an optional label" do
-      model_class.tree_field :name, "Full Name"
+      model_class.tree_field :name, label: "Full Name"
       field = model_class.tree_configuration.fields[:name]
       expect(field.label).to eq("Full Name")
     end
@@ -55,6 +61,12 @@ RSpec.describe ActiveTree::Model do
       children = model_class.tree_configuration.children
       expect(children.keys).to eq(%i[orders shipments])
     end
+
+    it "accepts options per child" do
+      model_class.tree_children :orders, { shipments: { label: "User Shipments" } }
+      child = model_class.tree_configuration.children[:shipments]
+      expect(child.label).to eq("User Shipments")
+    end
   end
 
   describe ".tree_child" do
@@ -65,7 +77,7 @@ RSpec.describe ActiveTree::Model do
     end
 
     it "accepts an optional label" do
-      model_class.tree_child :orders, "Customer Orders"
+      model_class.tree_child :orders, label: "Customer Orders"
       child = model_class.tree_configuration.children[:orders]
       expect(child.label).to eq("Customer Orders")
     end

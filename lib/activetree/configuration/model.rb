@@ -19,20 +19,36 @@ module ActiveTree
         @label_block&.call(instance)
       end
 
-      def configure_field(name, label = nil)
-        fields[name] = Field.new(name, label)
+      def configure_field(name, **kwargs)
+        fields[name] = Field.new(name, **kwargs)
       end
 
-      def configure_fields(*names)
-        names.each { |name| configure_field(name) }
+      def configure_fields(entries)
+        entries.each do |entry|
+          if entry.is_a?(Hash)
+            entry.each do |name, options|
+              configure_field(name, **options)
+            end
+          else
+            configure_field(entry)
+          end
+        end
       end
 
-      def configure_child(name, label = nil)
-        children[name] = Child.new(name, label)
+      def configure_child(name, **kwargs)
+        children[name] = Child.new(name, **kwargs)
       end
 
-      def configure_children(*names)
-        names.each { |name| configure_child(name) }
+      def configure_children(entries)
+        entries.each do |entry|
+          if entry.is_a?(Hash)
+            entry.each do |name, options|
+              configure_child(name, **options)
+            end
+          else
+            configure_child(entry)
+          end
+        end
       end
 
       def configure_label(&block)

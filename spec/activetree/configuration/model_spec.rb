@@ -38,20 +38,26 @@ RSpec.describe ActiveTree::Configuration::Model do
       config.configure_field(:email)
       field = config.fields[:email]
       expect(field.name).to eq(:email)
-      expect(field.label).to eq(:email)
+      expect(field.label).to eq("email")
     end
 
     it "accepts a custom label" do
-      config.configure_field(:email, "Email Address")
+      config.configure_field(:email, label: "Email Address")
       field = config.fields[:email]
       expect(field.label).to eq("Email Address")
     end
   end
 
   describe "#configure_fields" do
-    it "adds multiple fields" do
-      config.configure_fields(:id, :name, :email)
+    it "adds multiple fields from array" do
+      config.configure_fields(%i[id name email])
       expect(config.fields.keys).to eq(%i[id name email])
+    end
+
+    it "adds multiple fields from array with options" do
+      config.configure_fields([:id, :name, { email: { label: "Email Address" } }])
+      expect(config.fields.keys).to eq(%i[id name email])
+      expect(config.fields.values.map(&:label)).to eq(["id", "name", "Email Address"])
     end
   end
 
@@ -60,11 +66,11 @@ RSpec.describe ActiveTree::Configuration::Model do
       config.configure_child(:orders)
       child = config.children[:orders]
       expect(child.name).to eq(:orders)
-      expect(child.label).to eq(:orders)
+      expect(child.label).to eq("orders")
     end
 
     it "accepts a custom label" do
-      config.configure_child(:orders, "Customer Orders")
+      config.configure_child(:orders, label: "Customer Orders")
       child = config.children[:orders]
       expect(child.label).to eq("Customer Orders")
     end
@@ -81,11 +87,11 @@ RSpec.describe ActiveTree::Configuration::Model do
     it "defaults label to name" do
       field = described_class.new(:email)
       expect(field.name).to eq(:email)
-      expect(field.label).to eq(:email)
+      expect(field.label).to eq("email")
     end
 
     it "uses provided label" do
-      field = described_class.new(:email, "Email Address")
+      field = described_class.new(:email, label: "Email Address")
       expect(field.label).to eq("Email Address")
     end
   end
@@ -94,11 +100,11 @@ RSpec.describe ActiveTree::Configuration::Model do
     it "defaults label to name" do
       child = described_class.new(:orders)
       expect(child.name).to eq(:orders)
-      expect(child.label).to eq(:orders)
+      expect(child.label).to eq("orders")
     end
 
     it "uses provided label" do
-      child = described_class.new(:orders, "Customer Orders")
+      child = described_class.new(:orders, label: "Customer Orders")
       expect(child.label).to eq("Customer Orders")
     end
   end

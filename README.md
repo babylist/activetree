@@ -59,25 +59,36 @@ class User < ApplicationRecord
 end
 ```
 
-Singular forms accept an optional display label:
+Singular forms accept keyword options (currently `label:`):
 
 ```ruby
 class Order < ApplicationRecord
   include ActiveTree::Model
 
   tree_field :id
-  tree_field :status, "Order Status"
-  tree_child :line_items, "Items"
+  tree_field :status, label: "Order Status"
+  tree_child :line_items, label: "Items"
   tree_child :shipments
+end
+```
+
+The plural forms also accept inline option hashes to customize individual entries:
+
+```ruby
+class User < ApplicationRecord
+  include ActiveTree::Model
+
+  tree_fields :id, :email, { name: { label: "Full Name" } }, :created_at
+  tree_children :orders, { shipments: { label: "User Shipments" } }
 end
 ```
 
 | DSL Method | Default | Description |
 |-----------|---------|-------------|
 | `tree_fields` | `:id` only | Fields shown in the detail pane (batch) |
-| `tree_field` | — | Add a single field with an optional display label |
+| `tree_field` | — | Add a single field with keyword options (`label:`) |
 | `tree_children` | None | Associations expandable as tree children (batch) |
-| `tree_child` | — | Add a single child association with an optional display label |
+| `tree_child` | — | Add a single child association with keyword options (`label:`) |
 | `tree_label` | `"ClassName #id"` | Custom label block for tree nodes and detail pane |
 
 Models **without** the mixin still appear in the tree — they show only `:id` in the detail pane and have no expandable children.

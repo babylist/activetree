@@ -18,9 +18,9 @@ module ActiveTree
     def label
       if @loaded && !singular?
         count_str = @has_more ? "#{@offset}+" : child_record_count.to_s
-        "#{association_name} [#{count_str}]"
+        "#{association_configuration.label} [#{count_str}]"
       else
-        association_name
+        association_configuration.label
       end
     end
 
@@ -102,6 +102,10 @@ module ActiveTree
 
     def remove_load_more_node
       @children.reject! { |c| c.is_a?(LoadMoreNode) }
+    end
+
+    def association_configuration
+      @association_configuration ||= ActiveTree.config.model_configuration(record.class).children[association_name]
     end
   end
 end

@@ -12,20 +12,20 @@ module ActiveTree
         ActiveTree.config.model_configuration(self)
       end
 
-      def tree_field(name, label = nil)
-        tree_configuration.configure_field(name, label)
+      def tree_field(name, label: nil)
+        tree_configuration.configure_field(name, label:)
       end
 
-      def tree_fields(*field_names)
-        tree_configuration.configure_fields(*field_names)
+      def tree_fields(*field_entries)
+        tree_configuration.configure_fields(field_entries)
       end
 
-      def tree_child(name, label = nil)
-        tree_configuration.configure_child(name, label)
+      def tree_child(name, label: nil)
+        tree_configuration.configure_child(name, label:)
       end
 
-      def tree_children(*association_names)
-        tree_configuration.configure_children(*association_names)
+      def tree_children(*association_entries)
+        tree_configuration.configure_children(association_entries)
       end
 
       def tree_label(&block)

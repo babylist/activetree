@@ -31,7 +31,7 @@ module ActiveTree
 
     def detail_fields
       @detail_fields ||= if model_configuration.fields.any?
-                           model_configuration.fields.values.map(&:name)
+                           model_configuration.fields.values
                          else
                            [:id]
                          end
@@ -39,7 +39,7 @@ module ActiveTree
 
     def detail_pairs
       @detail_pairs ||= detail_fields.map do |field|
-        [field, record.public_send(field)]
+        [field.label, record.public_send(field.name)]
       end
     end
 
