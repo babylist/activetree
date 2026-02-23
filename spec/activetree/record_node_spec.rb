@@ -9,6 +9,8 @@ RSpec.describe ActiveTree::RecordNode do
   end
 
   describe "with mixin record" do
+    let(:reflection) { double("Reflection", macro: :has_many) }
+
     let(:record_class) do
       Class.new do
         def self.name
@@ -17,10 +19,6 @@ RSpec.describe ActiveTree::RecordNode do
 
         def self.column_names
           %w[id status total]
-        end
-
-        def self.reflect_on_association(_name)
-          nil
         end
 
         def id
@@ -43,6 +41,7 @@ RSpec.describe ActiveTree::RecordNode do
       instance = record_class.new
       record_class.tree_fields :id, :status, :total
       record_class.tree_children :line_items
+      allow(record_class).to receive(:reflect_on_association).with(:line_items).and_return(reflection)
       instance
     end
 
@@ -73,10 +72,6 @@ RSpec.describe ActiveTree::RecordNode do
           "User"
         end
 
-        def self.column_names
-          %w[id name email]
-        end
-
         def id
           42
         end
@@ -88,8 +83,8 @@ RSpec.describe ActiveTree::RecordNode do
     let(:record) { record_class.new }
     let(:node) { described_class.new(record: record, tree_state: tree_state) }
 
-    it "falls back to all columns for detail_fields" do
-      expect(node.detail_fields).to eq(%i[id name email])
+    it "falls back to [:id] for detail_fields" do
+      expect(node.detail_fields).to eq([:id])
     end
 
     it "is not expandable with no children" do

@@ -5,7 +5,6 @@ require "active_support/concern"
 RSpec.describe ActiveTree::Model do
   let(:model_class) do
     Class.new do
-      # Simulate class_attribute from ActiveSupport
       def self.name
         "TestModel"
       end
@@ -18,59 +17,69 @@ RSpec.describe ActiveTree::Model do
     end
   end
 
-  describe "class methods" do
-    it "defaults _tree_fields to nil" do
-      expect(model_class._tree_fields).to be_nil
+  describe ".tree_configuration" do
+    it "returns a Configuration::Model for the class" do
+      expect(model_class.tree_configuration).to be_a(ActiveTree::Configuration::Model)
     end
 
-    it "defaults _tree_children to empty array" do
-      expect(model_class._tree_children).to eq([])
+    it "returns the same configuration on repeated calls" do
+      expect(model_class.tree_configuration).to be(model_class.tree_configuration)
     end
+  end
 
-    it "defaults _tree_label_block to nil" do
-      expect(model_class._tree_label_block).to be_nil
-    end
-
-    it "stores tree_fields" do
+  describe ".tree_fields" do
+    it "registers fields in the configuration" do
       model_class.tree_fields :id, :name, :email
-      expect(model_class._tree_fields).to eq(%i[id name email])
+      fields = model_class.tree_configuration.fields
+      expect(fields.keys).to eq(%i[id name email])
+    end
+  end
+
+  describe ".tree_field" do
+    it "registers a single field" do
+      model_class.tree_field :name
+      fields = model_class.tree_configuration.fields
+      expect(fields.keys).to eq([:name])
     end
 
-    it "stores tree_children" do
+    it "accepts an optional label" do
+      model_class.tree_field :name, "Full Name"
+      field = model_class.tree_configuration.fields[:name]
+      expect(field.label).to eq("Full Name")
+    end
+  end
+
+  describe ".tree_children" do
+    it "registers children in the configuration" do
       model_class.tree_children :orders, :shipments
-      expect(model_class._tree_children).to eq(%i[orders shipments])
-    end
-
-    it "stores tree_label block" do
-      model_class.tree_label { |r| "Custom #{r.id}" }
-      expect(model_class._tree_label_block).to be_a(Proc)
+      children = model_class.tree_configuration.children
+      expect(children.keys).to eq(%i[orders shipments])
     end
   end
 
-  describe "instance methods" do
-    let(:instance) { model_class.new }
-
-    it "returns default label when no block configured" do
-      expect(instance.tree_node_label).to eq("TestModel #42")
+  describe ".tree_child" do
+    it "registers a single child" do
+      model_class.tree_child :orders
+      children = model_class.tree_configuration.children
+      expect(children.keys).to eq([:orders])
     end
 
-    it "returns custom label when block configured" do
+    it "accepts an optional label" do
+      model_class.tree_child :orders, "Customer Orders"
+      child = model_class.tree_configuration.children[:orders]
+      expect(child.label).to eq("Customer Orders")
+    end
+  end
+
+  describe ".tree_label" do
+    it "sets a custom label block" do
       model_class.tree_label { |r| "Record-#{r.id}" }
-      expect(instance.tree_node_label).to eq("Record-42")
-    end
-
-    it "returns tree_node_fields" do
-      model_class.tree_fields :id, :status
-      expect(instance.tree_node_fields).to eq(%i[id status])
-    end
-
-    it "returns tree_node_children" do
-      model_class.tree_children :items
-      expect(instance.tree_node_children).to eq([:items])
+      instance = model_class.new
+      expect(model_class.tree_configuration.label(instance)).to eq("Record-42")
     end
   end
 
-  describe "subclass inheritance" do
+  describe "subclass independence" do
     let(:parent_class) do
       Class.new do
         def self.name
@@ -93,16 +102,17 @@ RSpec.describe ActiveTree::Model do
       end
     end
 
-    it "inherits tree_fields from parent" do
-      parent_class.tree_fields :id, :name
-      expect(child_class._tree_fields).to eq(%i[id name])
-    end
-
-    it "can override tree_fields in child" do
+    it "gives each class its own configuration" do
       parent_class.tree_fields :id, :name
       child_class.tree_fields :id, :status
-      expect(child_class._tree_fields).to eq(%i[id status])
-      expect(parent_class._tree_fields).to eq(%i[id name])
+
+      expect(parent_class.tree_configuration.fields.keys).to eq(%i[id name])
+      expect(child_class.tree_configuration.fields.keys).to eq(%i[id status])
+    end
+
+    it "does not inherit parent configuration" do
+      parent_class.tree_fields :id, :name
+      expect(child_class.tree_configuration.fields).to be_empty
     end
   end
 end

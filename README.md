@@ -59,10 +59,25 @@ class User < ApplicationRecord
 end
 ```
 
+Singular forms accept an optional display label:
+
+```ruby
+class Order < ApplicationRecord
+  include ActiveTree::Model
+
+  tree_field :id
+  tree_field :status, "Order Status"
+  tree_child :line_items, "Items"
+  tree_child :shipments
+end
+```
+
 | DSL Method | Default | Description |
 |-----------|---------|-------------|
-| `tree_fields` | All columns | Fields shown in the detail pane |
-| `tree_children` | None | Associations expandable as tree children |
+| `tree_fields` | `:id` only | Fields shown in the detail pane (batch) |
+| `tree_field` | — | Add a single field with an optional display label |
+| `tree_children` | None | Associations expandable as tree children (batch) |
+| `tree_child` | — | Add a single child association with an optional display label |
 | `tree_label` | `"ClassName #id"` | Custom label block for tree nodes and detail pane |
 
 Models **without** the mixin still appear in the tree — they show only `:id` in the detail pane and have no expandable children.

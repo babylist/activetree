@@ -12,4 +12,8 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.before(:each) do
+    ActiveTree.instance_variable_set(:@config, nil)
+  end
 end

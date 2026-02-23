@@ -25,6 +25,13 @@ RSpec.describe ActiveTree do
       config.default_limit = 50
       expect(config.default_limit).to eq(50)
     end
+
+    it "returns and memoizes model_configuration" do
+      klass = Class.new
+      model_config = config.model_configuration(klass)
+      expect(model_config).to be_a(ActiveTree::Configuration::Model)
+      expect(config.model_configuration(klass)).to be(model_config)
+    end
   end
 
   describe ".configure" do

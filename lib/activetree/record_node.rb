@@ -11,11 +11,7 @@ module ActiveTree
     end
 
     def label
-      if record.respond_to?(:tree_node_label)
-        record.tree_node_label
-      else
-        "#{record.class.name} ##{record.id}"
-      end
+      @label ||= model_configuration.label(record)
     end
 
     def class_label
@@ -26,7 +22,7 @@ module ActiveTree
       # Can only expand root record if root node
       return false if (@tree_state.root.record == record) && (self != @tree_state.root)
 
-      configured_children.any?
+      children.any?
     end
 
     def children
@@ -34,17 +30,15 @@ module ActiveTree
     end
 
     def detail_fields
-      if record.respond_to?(:tree_node_fields) && record.tree_node_fields
-        record.tree_node_fields
-      elsif record.respond_to?(:tree_node_fields)
-        record.class.column_names.map(&:to_sym)
-      else
-        [:id]
-      end
+      @detail_fields ||= if model_configuration.fields.any?
+                           model_configuration.fields.values.map(&:name)
+                         else
+                           [:id]
+                         end
     end
 
     def detail_pairs
-      detail_fields.map do |field|
+      @detail_pairs ||= detail_fields.map do |field|
         [field, record.public_send(field)]
       end
     end
@@ -55,16 +49,16 @@ module ActiveTree
 
     private
 
+    def model_configuration
+      @model_configuration ||= ActiveTree.config.model_configuration(record.class)
+    end
+
     def configured_children
-      if record.respond_to?(:tree_node_children)
-        record.tree_node_children
-      else
-        []
-      end
+      model_configuration.children
     end
 
     def build_children
-      configured_children.filter_map do |assoc_name|
+      configured_children.values.map(&:name).filter_map do |assoc_name|
         build_association_node(assoc_name)
       end
     end
