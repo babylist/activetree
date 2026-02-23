@@ -1,6 +1,6 @@
 # ActiveTree
 
-A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a split-pane TUI rendered with raw ANSI escape codes, tty-screen, and Pastel; planned evolution into a mountable Rails Engine.
+A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a split-pane TUI rendered with `tty-box`, `tty-screen`, and `pastel`; planned evolution into a mountable Rails Engine.
 
 ## Naming
 
@@ -10,7 +10,7 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 
 ## Architecture
 
-**Runtime architecture:** CLI → TreeState → Renderer loop. TreeState owns a tree of nodes (`TreeNode` base → `RecordNode`, `AssociationGroupNode`, `LoadMoreNode`). The `ActiveTree::Model` concern provides per-model DSL (`tree_fields`, `tree_children`, `tree_label`). InputHandler reads raw keypresses; Renderer composes a full-screen frame each tick using ANSI escape codes and Pastel for color.
+**Runtime architecture:** CLI → TreeState → Renderer loop. TreeState owns a tree of nodes (`TreeNode` base → `RecordNode`, `AssociationGroupNode`, `LoadMoreNode`). The `ActiveTree::Model` concern provides per-model DSL (`tree_fields`, `tree_children`, `tree_label`). InputHandler reads raw keypresses; Renderer composes a full-screen frame each tick using two side-by-side `TTY::Box.frame` calls (tree pane + detail pane) with absolute positioning, plus a cursor-positioned footer. Screen is cleared (`\e[H\e[J`) before each frame to prevent stale content.
 
 **Engine upgrade path:** The Railtie is designed to swap its superclass to `Rails::Engine`, add `isolate_namespace`, and gain `config/routes.rb` + `app/` directories. Existing initializer and rake blocks transfer unchanged.
 
@@ -26,11 +26,11 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 - `spec.files` uses `git ls-files` — new files must be git-tracked before `gem build` will include them
 - Model discovery uses `config.after_initialize` (not `initializer`) because models aren't fully loaded during Rails initialization in development
 - `Gemfile.lock` is committed (Bundler recommends tracking it for gems and apps alike)
-- Several tty-* gems (`tty-box`, `tty-table`, `tty-tree`, `tty-prompt`, `tty-cursor`) remain in the gemspec but are not currently imported — `pastel` is used directly but only declared transitively. Reconcile before publishing.
+- Several tty-* gems (`tty-table`, `tty-tree`, `tty-prompt`, `tty-cursor`) remain in the gemspec but are not currently imported — `pastel` is used directly but only declared transitively. Reconcile before publishing.
 
 ## Dependencies
 
-Runtime: `activerecord >= 7.0`, `railties >= 7.0`, `tty-screen`, `pastel`
+Runtime: `activerecord >= 7.0`, `railties >= 7.0`, `tty-box`, `tty-screen`, `pastel`
 Dev: `rspec`, `rubocop`, `rake`, `irb`
 
 ## Commands

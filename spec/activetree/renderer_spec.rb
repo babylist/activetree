@@ -2,6 +2,7 @@
 
 require "active_support/concern"
 require "tty-screen"
+require "tty-box"
 require "pastel"
 
 RSpec.describe ActiveTree::Renderer do
