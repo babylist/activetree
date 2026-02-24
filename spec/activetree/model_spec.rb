@@ -67,6 +67,13 @@ RSpec.describe ActiveTree::Model do
       child = model_class.tree_configuration.children[:shipments]
       expect(child.label).to eq("User Shipments")
     end
+
+    it "accepts scope option in hash form" do
+      scope_proc = -> { approved }
+      model_class.tree_children :orders, { comments: { scope: scope_proc } }
+      child = model_class.tree_configuration.children[:comments]
+      expect(child.scope).to be(scope_proc)
+    end
   end
 
   describe ".tree_child" do
@@ -80,6 +87,13 @@ RSpec.describe ActiveTree::Model do
       model_class.tree_child :orders, label: "Customer Orders"
       child = model_class.tree_configuration.children[:orders]
       expect(child.label).to eq("Customer Orders")
+    end
+
+    it "accepts a positional scope proc" do
+      scope_proc = -> { approved }
+      model_class.tree_child :comments, scope_proc
+      child = model_class.tree_configuration.children[:comments]
+      expect(child.scope).to be(scope_proc)
     end
   end
 

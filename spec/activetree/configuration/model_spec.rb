@@ -78,7 +78,7 @@ RSpec.describe ActiveTree::Configuration::Model do
 
   describe "#configure_children" do
     it "adds multiple children" do
-      config.configure_children([:orders, :shipments])
+      config.configure_children(%i[orders shipments])
       expect(config.children.keys).to eq(%i[orders shipments])
     end
   end
@@ -106,6 +106,17 @@ RSpec.describe ActiveTree::Configuration::Model do
     it "uses provided label" do
       child = described_class.new(:orders, label: "Customer Orders")
       expect(child.label).to eq("Customer Orders")
+    end
+
+    it "defaults scope to nil" do
+      child = described_class.new(:orders)
+      expect(child.scope).to be_nil
+    end
+
+    it "stores and exposes a scope proc" do
+      scope_proc = -> { approved }
+      child = described_class.new(:orders, scope: scope_proc)
+      expect(child.scope).to be(scope_proc)
     end
   end
 end

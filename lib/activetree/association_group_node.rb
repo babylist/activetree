@@ -58,7 +58,11 @@ module ActiveTree
     end
 
     def load_singular_association
-      associated = record.public_send(association_name)
+      associated = if association_configuration&.scope
+                     apply_scope(record.association(association_name).scope).first
+                   else
+                     record.public_send(association_name)
+                   end
       return unless associated
 
       @children << build_record_node(associated)
@@ -72,13 +76,17 @@ module ActiveTree
 
     def fetch_records(offset)
       limit = ActiveTree.config.default_limit
-      all = record.public_send(association_name)
-                  .offset(offset)
-                  .limit(limit + 1)
-                  .to_a
+      base = apply_scope(record.public_send(association_name))
+      all = base.offset(offset).limit(limit + 1).to_a
 
       @has_more = all.size > limit
       all.first(limit)
+    end
+
+    def apply_scope(relation)
+      return relation unless association_configuration&.scope
+
+      relation.instance_exec(&association_configuration.scope)
     end
 
     def process_fetched_records(records)

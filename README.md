@@ -59,7 +59,7 @@ class User < ApplicationRecord
 end
 ```
 
-Singular forms accept keyword options (currently `label:`):
+Singular forms accept keyword options:
 
 ```ruby
 class Order < ApplicationRecord
@@ -83,12 +83,37 @@ class User < ApplicationRecord
 end
 ```
 
+### Scoping Children
+
+You can pass an ActiveRecord scope to `tree_child` to filter which records appear in the tree. The scope proc is evaluated via `instance_exec` on the association relation, so named scopes and query methods work naturally:
+
+```ruby
+class User < ApplicationRecord
+  include ActiveTree::Model
+
+  tree_child :comments, -> { approved }, label: "Approved Comments"
+  tree_child :orders, -> { where(status: "active") }
+end
+```
+
+The `tree_children` hash form supports `scope:` as well:
+
+```ruby
+class User < ApplicationRecord
+  include ActiveTree::Model
+
+  tree_children :orders, { comments: { scope: -> { approved }, label: "Approved" } }
+end
+```
+
+Scopes work for both collection (`has_many`) and singular (`has_one`, `belongs_to`) associations. The scope is merged with the existing association query — it never replaces it.
+
 | DSL Method | Default | Description |
 |-----------|---------|-------------|
 | `tree_fields` | `:id` only | Fields shown in the detail pane (batch) |
 | `tree_field` | — | Add a single field with keyword options (`label:`) |
 | `tree_children` | None | Associations expandable as tree children (batch) |
-| `tree_child` | — | Add a single child association with keyword options (`label:`) |
+| `tree_child` | — | Add a single child with options (`label:`, positional scope proc) |
 | `tree_label` | `"ClassName #id"` | Custom label block for tree nodes and detail pane |
 
 Models **without** the mixin still appear in the tree — they show only `:id` in the detail pane and have no expandable children.

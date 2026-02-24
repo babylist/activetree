@@ -20,8 +20,8 @@ module ActiveTree
         tree_configuration.configure_fields(field_entries)
       end
 
-      def tree_child(name, label: nil)
-        tree_configuration.configure_child(name, label:)
+      def tree_child(name, scope = nil, label: nil)
+        tree_configuration.configure_child(name, label:, scope:)
       end
 
       def tree_children(*association_entries)
