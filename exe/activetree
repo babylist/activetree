@@ -1,6 +1,28 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# Boot the host Rails application, then launch the ActiveTree TUI.
+# Must be run from the root of a Rails app:
+#   bundle exec activetree User 42
+
+env_file = File.expand_path("config/environment.rb", Dir.pwd)
+
+unless File.exist?(env_file)
+  warn "Error: could not find config/environment.rb in #{Dir.pwd}"
+  warn ""
+  warn "activetree must be run from the root of a Rails application."
+  exit 1
+end
+
+begin
+  puts "Loading Rails environment..."
+  require env_file
+rescue StandardError => e
+  warn "Error: failed to load Rails environment"
+  warn "  #{e.class}: #{e.message}"
+  exit 1
+end
+
 require "activetree"
 require "activetree/cli"
 

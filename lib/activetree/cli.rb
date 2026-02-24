@@ -5,6 +5,7 @@ require "active_support/core_ext/string/inflections"
 module ActiveTree
   class CLI
     def self.start(argv = [])
+      puts Pastel.new.magenta.bold("Starting ActiveTree v#{ActiveTree::VERSION}...")
       new(argv).run
     end
 
@@ -18,10 +19,14 @@ module ActiveTree
       renderer = Renderer.new(state)
       input = InputHandler.new
 
-      enter_alternate_screen
-      main_loop(state, renderer, input)
-    ensure
-      exit_alternate_screen if record
+      exit(1) && return unless record
+
+      begin
+        enter_alternate_screen
+        main_loop(state, renderer, input)
+      ensure
+        exit_alternate_screen
+      end
     end
 
     private
@@ -57,24 +62,19 @@ module ActiveTree
     def validate_argv!
       return if @argv.size >= 2
 
-      warn "Usage: activetree <ModelName> <id>"
-      warn "  e.g. activetree User 42"
-      exit 1
+      puts "Usage: activetree <ModelName> <id>"
+      puts "  e.g. activetree User 42"
     end
 
     def resolve_model(model_name)
       model_name.constantize
     rescue NameError
-      warn "Error: model '#{model_name}' not found"
-      exit 1
+      puts "Error: model '#{model_name}' not found"
+      nil
     end
 
     def find_record(klass, record_id)
-      record = klass.unscoped.find_by(id: record_id)
-      return record if record
-
-      warn "Error: #{klass.name} with id #{record_id} not found"
-      exit 1
+      klass&.unscoped&.find_by(id: record_id)
     end
 
     def enter_alternate_screen

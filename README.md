@@ -24,7 +24,7 @@ ActiveTree browses a single root record and its association tree. Pass a model n
 
 ```bash
 # Within a Rails app (via rake)
-bin/rails activetree:tree[User,42]
+bin/rails "activetree:tree[User,42]"
 
 # Standalone (with ActiveRecord configured)
 bundle exec activetree User 42
