@@ -21,7 +21,7 @@ module ActiveTree
       enter_alternate_screen
       main_loop(state, renderer, input)
     ensure
-      exit_alternate_screen
+      exit_alternate_screen if record
     end
 
     private
@@ -70,7 +70,7 @@ module ActiveTree
     end
 
     def find_record(klass, record_id)
-      record = klass.find_by(id: record_id)
+      record = klass.unscoped.find_by(id: record_id)
       return record if record
 
       warn "Error: #{klass.name} with id #{record_id} not found"
