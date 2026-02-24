@@ -33,7 +33,7 @@ module ActiveTree
       @detail_fields ||= if model_configuration.fields.any?
                            model_configuration.fields.values
                          else
-                           [:id]
+                           [Configuration::Model::Field.new(:id)]
                          end
     end
 

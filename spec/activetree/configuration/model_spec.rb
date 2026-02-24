@@ -78,7 +78,7 @@ RSpec.describe ActiveTree::Configuration::Model do
 
   describe "#configure_children" do
     it "adds multiple children" do
-      config.configure_children(:orders, :shipments)
+      config.configure_children([:orders, :shipments])
       expect(config.children.keys).to eq(%i[orders shipments])
     end
   end

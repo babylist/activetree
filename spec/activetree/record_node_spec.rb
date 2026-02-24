@@ -56,12 +56,12 @@ RSpec.describe ActiveTree::RecordNode do
     end
 
     it "returns configured detail_fields" do
-      expect(node.detail_fields).to eq(%i[id status total])
+      expect(node.detail_fields.map(&:name)).to eq(%i[id status total])
     end
 
     it "returns detail_pairs" do
       pairs = node.detail_pairs
-      expect(pairs).to eq([[:id, 7], [:status, "shipped"], [:total, 99.99]])
+      expect(pairs).to eq([["id", 7], ["status", "shipped"], ["total", 99.99]])
     end
   end
 
@@ -84,7 +84,7 @@ RSpec.describe ActiveTree::RecordNode do
     let(:node) { described_class.new(record: record, tree_state: tree_state) }
 
     it "falls back to [:id] for detail_fields" do
-      expect(node.detail_fields).to eq([:id])
+      expect(node.detail_fields.map(&:name)).to eq([:id])
     end
 
     it "is not expandable with no children" do
@@ -104,7 +104,7 @@ RSpec.describe ActiveTree::RecordNode do
     end
 
     it "shows only :id in detail_fields" do
-      expect(node.detail_fields).to eq([:id])
+      expect(node.detail_fields.map(&:name)).to eq([:id])
     end
 
     it "is not expandable" do

@@ -25,6 +25,10 @@ RSpec.describe ActiveTree::AssociationGroupNode do
     rec
   end
 
+  before do
+    ActiveTree.config.model_configuration(parent_record.class).configure_child(:items)
+  end
+
   let(:node) do
     described_class.new(
       record: parent_record,
@@ -37,7 +41,7 @@ RSpec.describe ActiveTree::AssociationGroupNode do
 
   describe "#label" do
     it "shows association name before loading" do
-      expect(node.label).to eq(:items)
+      expect(node.label).to eq("items")
     end
 
     it "shows count after loading" do
@@ -110,6 +114,10 @@ RSpec.describe ActiveTree::AssociationGroupNode do
       rec = double("OwnerRecord", id: 1)
       allow(rec).to receive(:public_send).with(:user).and_return(associated_record)
       rec
+    end
+
+    before do
+      ActiveTree.config.model_configuration(owner_record.class).configure_child(:user)
     end
 
     let(:singular_node) do
