@@ -6,7 +6,7 @@ require_relative "configuration/model_dsl"
 
 module ActiveTree
   class Configuration
-    attr_accessor :max_depth, :default_limit
+    attr_accessor :max_depth, :default_limit, :global_scope
 
     def initialize
       @max_depth = 3

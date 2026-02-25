@@ -18,6 +18,14 @@ RSpec.describe ActiveTree::Configuration::Dsl do
     end
   end
 
+  describe "#global_scope" do
+    it "sets the configuration global_scope" do
+      block = -> { where(org_id: 1) }
+      dsl.global_scope(&block)
+      expect(configuration.global_scope).to eq(block)
+    end
+  end
+
   describe "#model" do
     it "creates a model configuration by string name" do
       dsl.model("User") do

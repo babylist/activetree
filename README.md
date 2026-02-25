@@ -84,7 +84,7 @@ end
 
 ### Scoping Child Relations
 
-You can pass an ActiveRecord scope to `tree_child` to filter which records appear in the tree. The scope proc is evaluated via `instance_exec` on the association relation, so named scopes and query methods work naturally:
+An ActiveRecord scope can be passed for children to filter which records appear in the tree. The scope proc is merged onto the association relation via `ActiveRecord::Relation#merge`, so named scopes and query methods work naturally:
 
 ```ruby
 class User < ApplicationRecord
@@ -179,6 +179,36 @@ end
 |--------|---------|-------------|
 | `max_depth` | `3` | Maximum nesting depth for associations NOT YET IMPLEMENTED |
 | `default_limit` | `25` | Max records loaded per has_many expansion (paginated) |
+| `global_scope` | `nil` | A proc merged into every relation ActiveTree queries (see below) |
+
+#### Global Scope
+
+`global_scope` applies a scope to **every** query ActiveTree makes — the root record lookup and all association loads (both collection and singular). This is useful for multi-tenancy, soft-delete filtering, or any cross-cutting constraint.
+
+The proc is merged onto each relation via `ActiveRecord::Relation#merge`, so named scopes and query methods work naturally:
+
+```ruby
+# DSL style
+ActiveTree.configure do
+  global_scope { where(organization_id: Current.organization_id) }
+end
+
+# Direct assignment
+ActiveTree.config.global_scope = -> { where(deleted_at: nil) }
+```
+
+When a child association also has its own scope, both are applied — global scope first, then the per-child scope:
+
+```ruby
+ActiveTree.configure do
+  global_scope { where(organization_id: Current.organization_id) }
+
+  model "User" do
+    # The final relation for orders will have both the org filter AND the status filter
+    child :orders, -> { where(status: "active") }, label: "Active Orders"
+  end
+end
+```
 
 ### Pagination
 

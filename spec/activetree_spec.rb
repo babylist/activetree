@@ -26,6 +26,16 @@ RSpec.describe ActiveTree do
       expect(config.default_limit).to eq(50)
     end
 
+    it "defaults global_scope to nil" do
+      expect(config.global_scope).to be_nil
+    end
+
+    it "allows setting global_scope" do
+      scope = -> { where(org_id: 1) }
+      config.global_scope = scope
+      expect(config.global_scope).to eq(scope)
+    end
+
     it "returns and memoizes model_configuration by class" do
       klass = Class.new { def self.name = "TestWidget" }
       model_config = config.model_configuration(klass)

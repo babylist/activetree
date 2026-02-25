@@ -74,7 +74,11 @@ module ActiveTree
     end
 
     def find_record(klass, record_id)
-      klass&.unscoped&.find_by(id: record_id)
+      relation = klass&.unscoped
+      return nil unless relation
+
+      relation = relation.merge(ActiveTree.config.global_scope) if ActiveTree.config.global_scope
+      relation.find_by(id: record_id)
     end
 
     def enter_alternate_screen

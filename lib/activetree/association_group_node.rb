@@ -58,7 +58,7 @@ module ActiveTree
     end
 
     def load_singular_association
-      associated = if association_configuration&.scope
+      associated = if association_configuration&.scope || ActiveTree.config.global_scope
                      apply_scope(record.association(association_name).scope).first
                    else
                      record.public_send(association_name)
@@ -84,9 +84,10 @@ module ActiveTree
     end
 
     def apply_scope(relation)
+      relation = relation.merge(ActiveTree.config.global_scope) if ActiveTree.config.global_scope
       return relation unless association_configuration&.scope
 
-      relation.instance_exec(&association_configuration.scope)
+      relation.merge(association_configuration.scope)
     end
 
     def process_fetched_records(records)

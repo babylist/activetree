@@ -61,7 +61,7 @@ RSpec.describe ActiveTree::RecordNode do
 
     it "returns detail_pairs" do
       pairs = node.detail_pairs
-      expect(pairs).to eq([["id", 7], ["status", "shipped"], ["total", 99.99]])
+      expect(pairs).to eq([["id", 7], %w[status shipped], ["total", 99.99]])
     end
   end
 

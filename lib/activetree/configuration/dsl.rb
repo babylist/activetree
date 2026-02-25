@@ -15,6 +15,10 @@ module ActiveTree
         @configuration.default_limit = value
       end
 
+      def global_scope(&block)
+        @configuration.global_scope = block
+      end
+
       def model(name, &block)
         model_config = @configuration.model_configuration(name)
         ModelDsl.new(model_config).instance_eval(&block) if block
