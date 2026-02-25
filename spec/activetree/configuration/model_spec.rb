@@ -16,6 +16,30 @@ RSpec.describe ActiveTree::Configuration::Model do
     it "stores the model class" do
       expect(config.model_class).to eq(model_class)
     end
+
+    it "stores the model class name" do
+      expect(config.model_class_name).to eq("Widget")
+    end
+  end
+
+  context "when constructed with a string" do
+    subject(:config) { described_class.new("StringOnlyModel") }
+
+    it "has empty fields" do
+      expect(config.fields).to eq({})
+    end
+
+    it "has empty children" do
+      expect(config.children).to eq({})
+    end
+
+    it "stores the model class name" do
+      expect(config.model_class_name).to eq("StringOnlyModel")
+    end
+
+    it "returns nil for model_class when class does not exist" do
+      expect(config.model_class).to be_nil
+    end
   end
 
   describe "#label" do

@@ -21,8 +21,12 @@ module ActiveTree
       @config ||= Configuration.new
     end
 
-    def configure
-      yield config
+    def configure(&block)
+      if block.arity == 1
+        yield config
+      else
+        Configuration::Dsl.new(config).instance_eval(&block)
+      end
     end
   end
 end

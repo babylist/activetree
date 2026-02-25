@@ -1,6 +1,6 @@
 # ActiveTree
 
-An interactive tree-based admin interface for ActiveRecord. ActiveTree renders a persistent split-pane TUI (terminal UI) for browsing records, their associations, and field values — like nerdtree for your database.
+An interactive tree-based admin interface for ActiveRecord. ActiveTree renders a persistent split-pane TUI (terminal UI) for browsing records, their associations, and field values.
 
 ## Installation
 
@@ -23,10 +23,9 @@ bundle install
 ActiveTree browses a single root record and its association tree. Pass a model name and ID:
 
 ```bash
-# Within a Rails app (via rake)
-bin/rails "activetree:tree[User,42]"
+# Within a Rails app
 
-# Standalone (with ActiveRecord configured)
+bin/rails "activetree:tree[User,42]"
 bundle exec activetree User 42
 ```
 
@@ -83,7 +82,7 @@ class User < ApplicationRecord
 end
 ```
 
-### Scoping Children
+### Scoping Child Relations
 
 You can pass an ActiveRecord scope to `tree_child` to filter which records appear in the tree. The scope proc is evaluated via `instance_exec` on the association relation, so named scopes and query methods work naturally:
 
@@ -106,26 +105,75 @@ class User < ApplicationRecord
 end
 ```
 
-Scopes work for both collection (`has_many`) and singular (`has_one`, `belongs_to`) associations. The scope is merged with the existing association query — it never replaces it.
+Scopes work for both collection (`has_many`) and singular (`has_one`, `belongs_to`) associations. The scope is merged with the existing association relation — it never replaces it.
 
-| DSL Method | Default | Description |
+| Method | Default | Description |
 |-----------|---------|-------------|
 | `tree_fields` | `:id` only | Fields shown in the detail pane (batch) |
 | `tree_field` | — | Add a single field with keyword options (`label:`) |
 | `tree_children` | None | Associations expandable as tree children (batch) |
 | `tree_child` | — | Add a single child with options (`label:`, positional scope proc) |
-| `tree_label` | `"ClassName #id"` | Custom label block for tree nodes and detail pane |
+| `tree_label` | `-> (record) { "#{record.class.name} #{record.id}" }` | Custom label block for tree nodes and detail pane |
 
-Models **without** the mixin still appear in the tree — they show only `:id` in the detail pane and have no expandable children.
+Models **without** the mixin still appear in the tree if referenced as children of another model, using the defaults above.
 
-### Configuration
+### Centralized Configuration via DSL
+
+ActiveTree can also be configured centrally with a DSL (e.g. in an initializer). This is especially useful for third-party models or keeping tree config separate from your models:
 
 ```ruby
-ActiveTree.configure do |config|
-  config.max_depth = 5
-  config.default_limit = 50
+# config/initializers/activetree.rb
+ActiveTree.configure do
+  max_depth 5
+  default_limit 50
+
+  model "User" do
+    fields :id, :email, :name, :created_at
+    children :orders, :profile
+    label { |record| "#{record.name} (#{record.email})" }
+  end
+
+  model "Order" do
+    field :id
+    field :status, label: "Order Status"
+    child :line_items, label: "Items"
+    child :shipments
+  end
 end
 ```
+
+Model names are passed as strings because classes may not be loaded when the initializer runs. The DSL methods mirror the `ActiveTree::Model` concern without the `tree_` prefix:
+
+| DSL Method | Equivalent Concern Method | Description |
+|-----------|--------------------------|-------------|
+| `field :name, label: "..."` | `tree_field` | Add a single field |
+| `fields :id, :email, ...` | `tree_fields` | Add multiple fields |
+| `child :orders, scope, label: "..."` | `tree_child` | Add a single child (optional scope proc + label) |
+| `children :orders, :shipments` | `tree_children` | Add multiple children |
+| `label { \|r\| ... }` | `tree_label` | Custom label block |
+
+#### Merging with the Model Concern
+
+Both configuration styles write to the same underlying config. If a model is configured in an initializer _and_ includes `ActiveTree::Model`, the results merge — fields and children accumulate, and last-write-wins for any given name:
+
+```ruby
+# initializer
+ActiveTree.configure do
+  model "User" do
+    field :id
+    field :name, label: "First"
+  end
+end
+
+# model
+class User < ApplicationRecord
+  include ActiveTree::Model
+  tree_field :email
+  tree_field :name, label: "Full Name"  # overwrites initializer's label
+end
+```
+
+### Global Options
 
 | Option | Default | Description |
 |--------|---------|-------------|

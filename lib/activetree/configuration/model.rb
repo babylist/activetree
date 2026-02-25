@@ -1,18 +1,30 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/string/inflections"
 require_relative "model/field"
 require_relative "model/child"
 
 module ActiveTree
   class Configuration
     class Model
-      attr_reader :model_class, :fields, :children
+      attr_reader :model_class_name, :fields, :children
 
-      def initialize(model_class)
-        @model_class = model_class
+      def initialize(model)
+        if model.is_a?(String)
+          @model_class_name = model
+        else
+          @model_class = model
+          @model_class_name = model.name
+        end
         @label_block = ->(instance) { "#{instance.class.name} ##{instance.id}" }
         @fields = {}
         @children = {}
+      end
+
+      def model_class
+        @model_class ||= @model_class_name&.constantize
+      rescue NameError
+        nil
       end
 
       def label(instance)
