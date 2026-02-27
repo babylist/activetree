@@ -10,7 +10,8 @@ module ActiveTree
       "q" => :quit,
       "k" => :move_up,
       "j" => :move_down,
-      "r" => :make_root
+      "r" => :make_root,
+      "\t" => :toggle_focus
     }.freeze
 
     def initialize(input: $stdin)

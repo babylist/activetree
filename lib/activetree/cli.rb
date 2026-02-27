@@ -45,8 +45,11 @@ module ActiveTree
 
     def dispatch(action, state)
       case action
-      when :move_up then state.move_up
-      when :move_down then state.move_down
+      when :toggle_focus then state.toggle_focus
+      when :move_up
+        state.detail_focused? ? state.scroll_detail_up : state.move_up
+      when :move_down
+        state.detail_focused? ? state.scroll_detail_down : state.move_down
       when :toggle_expand then state.toggle_expand
       when :select then state.select_current
       when :make_root then state.make_selected_record_root

@@ -106,4 +106,80 @@ RSpec.describe ActiveTree::TreeState do
       expect(state.scroll_offset).to eq(0)
     end
   end
+
+  describe "#toggle_focus" do
+    it "switches from tree to detail" do
+      expect(state.focused_pane).to eq(:tree)
+      state.toggle_focus
+      expect(state.focused_pane).to eq(:detail)
+    end
+
+    it "switches from detail back to tree" do
+      state.toggle_focus
+      state.toggle_focus
+      expect(state.focused_pane).to eq(:tree)
+    end
+  end
+
+  describe "#detail_focused? / #tree_focused?" do
+    it "reports tree focused by default" do
+      expect(state.tree_focused?).to be true
+      expect(state.detail_focused?).to be false
+    end
+
+    it "reports detail focused after toggle" do
+      state.toggle_focus
+      expect(state.tree_focused?).to be false
+      expect(state.detail_focused?).to be true
+    end
+  end
+
+  describe "#scroll_detail_up" do
+    it "clamps at 0" do
+      state.scroll_detail_up
+      expect(state.detail_scroll_offset).to eq(0)
+    end
+
+    it "decrements when offset is positive" do
+      state.detail_content_height = 30
+      state.visible_height = 10
+      3.times { state.scroll_detail_down }
+      state.scroll_detail_up
+      expect(state.detail_scroll_offset).to eq(2)
+    end
+  end
+
+  describe "#scroll_detail_down" do
+    it "stays at 0 when content fits in viewport" do
+      state.detail_content_height = 5
+      state.visible_height = 10
+      state.scroll_detail_down
+      expect(state.detail_scroll_offset).to eq(0)
+    end
+
+    it "increments when content overflows" do
+      state.detail_content_height = 30
+      state.visible_height = 10
+      state.scroll_detail_down
+      expect(state.detail_scroll_offset).to eq(1)
+    end
+
+    it "clamps at max_offset" do
+      state.detail_content_height = 12
+      state.visible_height = 10
+      10.times { state.scroll_detail_down }
+      expect(state.detail_scroll_offset).to eq(2)
+    end
+  end
+
+  describe "#select_current resets detail scroll" do
+    it "resets detail_scroll_offset to 0" do
+      state.detail_content_height = 30
+      state.visible_height = 10
+      5.times { state.scroll_detail_down }
+      expect(state.detail_scroll_offset).to eq(5)
+      state.select_current
+      expect(state.detail_scroll_offset).to eq(0)
+    end
+  end
 end

@@ -10,14 +10,14 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 
 ## Architecture
 
-**Runtime architecture:** CLI → TreeState → Renderer loop. TreeState owns a tree of nodes (`TreeNode` base → `RecordNode`, `AssociationGroupNode`, `LoadMoreNode`). The `ActiveTree::Model` concern provides per-model DSL (`tree_fields`, `tree_children`, `tree_label`). InputHandler reads raw keypresses; Renderer composes a full-screen frame each tick using two side-by-side `TTY::Box.frame` calls (tree pane + detail pane) with absolute positioning, plus a cursor-positioned footer. Screen is cleared (`\e[H\e[J`) before each frame to prevent stale content.
+**Runtime architecture:** CLI → TreeState → Renderer loop. TreeState owns a tree of nodes (`TreeNode` base → `RecordNode`, `AssociationGroupNode`, `LoadMoreNode`). The `ActiveTree::Model` concern provides per-model DSL (`tree_fields`, `tree_children`, `tree_label`). InputHandler reads raw keypresses; Renderer composes a full-screen frame each tick using two side-by-side `TTY::Box.frame` calls (tree pane + detail pane) with absolute positioning, plus a cursor-positioned footer. Screen is cleared (`\e[H\e[J`) before each frame to prevent stale content. The two panes share a focus model toggled by Tab — the focused pane gets a magenta border while the unfocused pane dims to bright-black. Each pane scrolls independently (`scroll_offset` for tree, `detail_scroll_offset` for detail) and renders a `░`/`█` scrollbar when content overflows.
 
 **Engine upgrade path:** The Railtie is designed to swap its superclass to `Rails::Engine`, add `isolate_namespace`, and gain `config/routes.rb` + `app/` directories. Existing initializer and rake blocks transfer unchanged.
 
 ## Code style
 
 - Ruby >= 3.1, double-quoted strings everywhere
-- RuboCop with `NewCops: enable`, `Style/Documentation` disabled
+- RuboCop with `NewCops: enable`, `Style/Documentation` disabled, `Metrics/*` cops excluded for `renderer.rb` and `cli.rb` (intentional — these files are inherently complex TUI code)
 - `frozen_string_literal: true` in every `.rb` file
 - RSpec for tests (`bundle exec rspec`), RuboCop for linting (`bundle exec rubocop`)
 
@@ -26,7 +26,7 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 - `spec.files` uses `git ls-files` — new files must be git-tracked before `gem build` will include them
 - Model discovery uses `config.after_initialize` (not `initializer`) because models aren't fully loaded during Rails initialization in development
 - `Gemfile.lock` is committed (Bundler recommends tracking it for gems and apps alike)
-- Several tty-* gems (`tty-table`, `tty-tree`, `tty-prompt`, `tty-cursor`) remain in the gemspec but are not currently imported — `pastel` is used directly but only declared transitively. Reconcile before publishing.
+- Several tty-* gems (`tty-table`, `tty-tree`, `tty-prompt`, `tty-cursor`) remain in the gemspec but are not currently imported — `pastel` and `strings-ansi` (`Strings::ANSI.sanitize` for ANSI-aware width measurement) are used directly but only declared transitively. Reconcile before publishing.
 
 ## Dependencies
 

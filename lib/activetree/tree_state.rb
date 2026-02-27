@@ -2,8 +2,9 @@
 
 module ActiveTree
   class TreeState
-    attr_reader :root, :cursor_index, :scroll_offset, :selected_record_node
-    attr_accessor :visible_height
+    attr_reader :root, :cursor_index, :scroll_offset, :selected_record_node,
+                :focused_pane, :detail_scroll_offset
+    attr_accessor :visible_height, :detail_content_height
 
     def initialize(root_record:)
       @root = RecordNode.new(record: root_record, tree_state: self)
@@ -12,6 +13,9 @@ module ActiveTree
       @scroll_offset = 0
       @visible_height = 20
       @selected_record_node = @root
+      @focused_pane = :tree
+      @detail_scroll_offset = 0
+      @detail_content_height = 0
     end
 
     def visible_nodes
@@ -44,9 +48,33 @@ module ActiveTree
       end
     end
 
+    def toggle_focus
+      @focused_pane = @focused_pane == :tree ? :detail : :tree
+    end
+
+    def detail_focused?
+      @focused_pane == :detail
+    end
+
+    def tree_focused?
+      @focused_pane == :tree
+    end
+
+    def scroll_detail_up
+      @detail_scroll_offset = [@detail_scroll_offset - 1, 0].max
+    end
+
+    def scroll_detail_down
+      max_offset = [@detail_content_height - visible_height, 0].max
+      @detail_scroll_offset = [@detail_scroll_offset + 1, max_offset].min
+    end
+
     def select_current
       node = cursor_node
-      @selected_record_node = node if node.is_a?(RecordNode)
+      return unless node.is_a?(RecordNode)
+
+      @selected_record_node = node
+      @detail_scroll_offset = 0
     end
 
     def make_selected_record_root
@@ -58,6 +86,7 @@ module ActiveTree
       @selected_record_node = @root
       @cursor_index = 0
       @scroll_offset = 0
+      @detail_scroll_offset = 0
     end
 
     private

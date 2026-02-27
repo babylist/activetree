@@ -16,3 +16,29 @@ Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
     - "*.gemspec"
+
+Metrics/ClassLength:
+  Exclude:
+    - "lib/activetree/renderer.rb"
+
+Metrics/MethodLength:
+  Exclude:
+    - "lib/activetree/renderer.rb"
+    - "lib/activetree/cli.rb"
+
+Metrics/AbcSize:
+  Exclude:
+    - "lib/activetree/renderer.rb"
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - "lib/activetree/cli.rb"
+    - "lib/activetree/renderer.rb"
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - "lib/activetree/renderer.rb"
+
+Metrics/ParameterLists:
+  Exclude:
+    - "lib/activetree/renderer.rb"

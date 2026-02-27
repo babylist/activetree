@@ -33,12 +33,15 @@ The TUI opens a full-screen split-pane interface:
 - **Left pane** — navigable tree with expand/collapse for associations
 - **Right pane** — field/value detail view for the selected record
 
+Use `Tab` to switch focus between panes. The focused pane is highlighted with a magenta border. Both panes scroll independently and show a scrollbar when content overflows.
+
 ### Key Bindings
 
 | Key | Action |
 |-----|--------|
-| `j` / `Down` | Move cursor down |
-| `k` / `Up` | Move cursor up |
+| `j` / `Down` | Move cursor down (tree) or scroll down (detail) |
+| `k` / `Up` | Move cursor up (tree) or scroll up (detail) |
+| `Tab` | Switch focus between tree and detail panes |
 | `Space` | Expand / collapse node |
 | `Enter` | Select record (show details in right pane) |
 | `r` | Make selected record the new root |
