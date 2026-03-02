@@ -58,6 +58,7 @@ module ActiveTree
 
     def build_detail_box(lines)
       detail_title = "[#{@state.selected_record_node&.class_label}] #{@state.selected_record_node&.label}"
+      detail_title = truncate(detail_title, @detail_w - 4)
       border_style = @state.detail_focused? ? { fg: :magenta } : { fg: :bright_black }
       TTY::Box.frame(
         top: 2,
