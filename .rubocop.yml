@@ -35,7 +35,6 @@ Metrics/AbcSize:
 
 Metrics/CyclomaticComplexity:
   Exclude:
-    - "lib/activetree/cli.rb"
     - "lib/activetree/renderer.rb"
     - "lib/activetree/tree_state.rb"
 

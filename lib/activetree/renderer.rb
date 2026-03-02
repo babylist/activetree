@@ -74,7 +74,7 @@ module ActiveTree
     end
 
     def positioned_footer
-      help = " \u2191\u2193 navigate  \u2190\u2192, Space open/close  Tab pane focus  Enter select  r root  q quit "
+      help = " \u2191\u2193 navigate  \u2190\u2192/Space open/close  Tab focus  Enter select  f fields  r root  q quit "
       "\e[#{@content_h + 5};1H#{@pastel.magenta.inverse(help.center(@width))}"
     end
 
@@ -131,7 +131,11 @@ module ActiveTree
         return []
       end
 
-      all_lines = selected.detail_pairs.map { |field, value| format_detail_field(field, value, width) }
+      mode = @state.field_mode(selected.record.class)
+      pairs = mode == :all_columns ? selected.all_columns_detail_pairs : selected.detail_pairs
+      mode_label = mode == :all_columns ? "Field mode: all columns" : "Field mode: configured"
+      all_lines = [@pastel.dim(" #{mode_label}")]
+      all_lines += pairs.map { |field, value| format_detail_field(field, value, width) }
       @state.detail_content_height = all_lines.size
 
       start_idx = @state.detail_scroll_offset

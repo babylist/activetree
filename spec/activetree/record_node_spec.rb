@@ -64,6 +64,17 @@ RSpec.describe ActiveTree::RecordNode do
       expect(pairs).to eq([["id", 7], %w[status shipped], ["total", 99.99]])
     end
 
+    describe "#all_columns_detail_pairs" do
+      it "returns pairs for every column in schema order" do
+        pairs = node.all_columns_detail_pairs
+        expect(pairs).to eq([["id", 7], ["status", "shipped"], ["total", 99.99]])
+      end
+
+      it "is memoized" do
+        expect(node.all_columns_detail_pairs).to equal(node.all_columns_detail_pairs)
+      end
+    end
+
     describe "#loaded?" do
       it "is false before detail_pairs is accessed" do
         expect(node).not_to be_loaded
@@ -71,6 +82,11 @@ RSpec.describe ActiveTree::RecordNode do
 
       it "is true after detail_pairs is accessed" do
         node.detail_pairs
+        expect(node).to be_loaded
+      end
+
+      it "is true after all_columns_detail_pairs is accessed" do
+        node.all_columns_detail_pairs
         expect(node).to be_loaded
       end
     end

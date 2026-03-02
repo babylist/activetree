@@ -16,6 +16,7 @@ module ActiveTree
       @focused_pane = :tree
       @detail_scroll_offset = 0
       @detail_content_height = 0
+      @field_modes = {}
     end
 
     def visible_nodes
@@ -67,6 +68,14 @@ module ActiveTree
       end
     end
 
+    def cursor_up
+      detail_focused? ? scroll_detail_up : move_up
+    end
+
+    def cursor_down
+      detail_focused? ? scroll_detail_down : move_down
+    end
+
     def detail_focused?
       @focused_pane == :detail
     end
@@ -82,6 +91,20 @@ module ActiveTree
     def scroll_detail_down
       max_offset = [@detail_content_height - visible_height, 0].max
       @detail_scroll_offset = [@detail_scroll_offset + 1, max_offset].min
+    end
+
+    def field_mode(klass)
+      @field_modes[klass.name] || :config
+    end
+
+    def toggle_field_mode
+      node = selected_record_node
+      return unless node.is_a?(RecordNode)
+
+      klass_name = node.record.class.name
+      current = @field_modes[klass_name] || :config
+      @field_modes[klass_name] = current == :config ? :all_columns : :config
+      @detail_scroll_offset = 0
     end
 
     def select_current

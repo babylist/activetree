@@ -15,7 +15,8 @@ module ActiveTree
       "\r" => :select,
       "q" => :quit,
       "r" => :make_root,
-      "\t" => :toggle_focus
+      "\t" => :toggle_focus,
+      "f" => :toggle_field_mode
     }.freeze
 
     def initialize(input: $stdin)

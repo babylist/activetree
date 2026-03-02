@@ -119,6 +119,78 @@ RSpec.describe ActiveTree::Renderer do
       end
     end
 
+    context "field mode indicator" do
+      it "shows 'Field mode: configured' by default" do
+        expect(output).to include("Field mode: configured")
+      end
+
+      it "shows 'Field mode: all columns' after toggle" do
+        allow(record.class).to receive(:column_names).and_return(%w[id])
+        allow(record).to receive(:public_send).with("id").and_return(42)
+        state.toggle_field_mode
+        expect(renderer.render).to include("Field mode: all columns")
+      end
+    end
+
+    context "field mode toggle in detail pane" do
+      let(:record_class) do
+        Class.new do
+          def self.name
+            "Widget"
+          end
+
+          def self.column_names
+            %w[id name color weight]
+          end
+
+          def id
+            1
+          end
+
+          def name
+            "Sprocket"
+          end
+
+          def color
+            "red"
+          end
+
+          def weight
+            3.5
+          end
+
+          include ActiveTree::Model
+        end
+      end
+
+      let(:record) do
+        klass = record_class
+        klass.tree_fields :id, :name
+        klass.new
+      end
+
+      it "renders configured fields by default" do
+        output = renderer.render
+        expect(output).to include("id")
+        expect(output).to include("name")
+        expect(output).not_to include("color")
+        expect(output).not_to include("weight")
+      end
+
+      it "renders all columns after toggle" do
+        state.toggle_field_mode
+        output = renderer.render
+        expect(output).to include("id")
+        expect(output).to include("name")
+        expect(output).to include("color")
+        expect(output).to include("weight")
+      end
+    end
+
+    it "includes 'f fields' in the help bar" do
+      expect(output).to include("f fields")
+    end
+
     context "when the detail title exceeds the pane width" do
       let(:record) do
         obj = double("Record", id: 42, class: double(name: "VeryLongModuleName::VeryLongClassName"))

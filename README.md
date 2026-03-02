@@ -44,8 +44,15 @@ Use `Tab` to switch focus between panes. The focused pane is highlighted with a 
 | `Tab` | Switch focus between tree and detail panes |
 | `Space` | Expand / collapse node |
 | `Enter` | Select record (show details in right pane) |
+| `f` | Toggle field mode (configured fields vs. all columns) |
 | `r` | Make selected record the new root |
 | `q` | Quit |
+
+### Field Mode
+
+By default the detail pane shows only the fields declared via `tree_fields` (or `:id` if none are configured). Press `f` to toggle **field mode** — this switches the detail pane to display every column in the model's database schema. Press `f` again to return to the configured view.
+
+The current mode is shown at the top of the detail pane ("Field mode: configured" or "Field mode: all columns"). Field mode is tracked per model class, so toggling on a `User` record won't affect how `Order` records are displayed.
 
 ### Configuring Models
 

@@ -4,6 +4,18 @@ require "active_support/core_ext/string/inflections"
 
 module ActiveTree
   class CLI
+    DISPATCH = {
+      toggle_focus: :toggle_focus,
+      navigate_right: :navigate_right,
+      navigate_left: :navigate_left,
+      move_up: :cursor_up,
+      move_down: :cursor_down,
+      toggle_expand: :toggle_expand,
+      select: :select_current,
+      make_root: :make_selected_record_root,
+      toggle_field_mode: :toggle_field_mode
+    }.freeze
+
     def self.start(argv = [])
       puts Pastel.new.magenta.bold("Starting ActiveTree v#{ActiveTree::VERSION}...")
       new(argv).run
@@ -44,18 +56,7 @@ module ActiveTree
     end
 
     def dispatch(action, state)
-      case action
-      when :toggle_focus then state.toggle_focus
-      when :navigate_right then state.navigate_right
-      when :navigate_left then state.navigate_left
-      when :move_up
-        state.detail_focused? ? state.scroll_detail_up : state.move_up
-      when :move_down
-        state.detail_focused? ? state.scroll_detail_down : state.move_down
-      when :toggle_expand then state.toggle_expand
-      when :select then state.select_current
-      when :make_root then state.make_selected_record_root
-      end
+      state.public_send(DISPATCH[action]) if DISPATCH[action]
     end
 
     def resolve_root_record

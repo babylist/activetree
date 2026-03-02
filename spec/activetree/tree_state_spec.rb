@@ -317,6 +317,73 @@ RSpec.describe ActiveTree::TreeState do
     end
   end
 
+  describe "#field_mode" do
+    it "defaults to :config for any class" do
+      expect(state.field_mode(record.class)).to eq(:config)
+    end
+  end
+
+  describe "#toggle_field_mode" do
+    it "switches from :config to :all_columns" do
+      state.toggle_field_mode
+      expect(state.field_mode(record.class)).to eq(:all_columns)
+    end
+
+    it "switches back to :config on second toggle" do
+      state.toggle_field_mode
+      state.toggle_field_mode
+      expect(state.field_mode(record.class)).to eq(:config)
+    end
+
+    it "resets detail_scroll_offset to 0" do
+      state.detail_content_height = 30
+      state.visible_height = 10
+      5.times { state.scroll_detail_down }
+      expect(state.detail_scroll_offset).to eq(5)
+      state.toggle_field_mode
+      expect(state.detail_scroll_offset).to eq(0)
+    end
+
+    it "scopes mode per class name" do
+      other_record = double("Record", id: 2, class: double(name: "Order"))
+      other_state = described_class.new(root_record: other_record)
+
+      state.toggle_field_mode
+      expect(state.field_mode(record.class)).to eq(:all_columns)
+      expect(other_state.field_mode(other_record.class)).to eq(:config)
+    end
+  end
+
+  describe "#cursor_up" do
+    it "calls move_up when tree is focused" do
+      allow(state).to receive(:move_up)
+      state.cursor_up
+      expect(state).to have_received(:move_up)
+    end
+
+    it "calls scroll_detail_up when detail is focused" do
+      state.toggle_focus
+      allow(state).to receive(:scroll_detail_up)
+      state.cursor_up
+      expect(state).to have_received(:scroll_detail_up)
+    end
+  end
+
+  describe "#cursor_down" do
+    it "calls move_down when tree is focused" do
+      allow(state).to receive(:move_down)
+      state.cursor_down
+      expect(state).to have_received(:move_down)
+    end
+
+    it "calls scroll_detail_down when detail is focused" do
+      state.toggle_focus
+      allow(state).to receive(:scroll_detail_down)
+      state.cursor_down
+      expect(state).to have_received(:scroll_detail_down)
+    end
+  end
+
   describe "#select_current resets detail scroll" do
     it "resets detail_scroll_offset to 0" do
       state.detail_content_height = 30

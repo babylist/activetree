@@ -9,6 +9,7 @@ module ActiveTree
       @record = record
       @children = nil
       @detail_pairs = nil
+      @all_columns_detail_pairs = nil
     end
 
     def label
@@ -27,7 +28,7 @@ module ActiveTree
     end
 
     def loaded?
-      !@detail_pairs.nil?
+      !@detail_pairs.nil? || !@all_columns_detail_pairs.nil?
     end
 
     def children
@@ -45,6 +46,12 @@ module ActiveTree
     def detail_pairs
       @detail_pairs ||= detail_fields.map do |field|
         [field.label, record.public_send(field.name)]
+      end
+    end
+
+    def all_columns_detail_pairs
+      @all_columns_detail_pairs ||= record.class.column_names.map do |col|
+        [col, record.public_send(col)]
       end
     end
 
