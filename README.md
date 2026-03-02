@@ -35,12 +35,23 @@ The TUI opens a full-screen split-pane interface:
 
 Use `Tab` to switch focus between panes. The focused pane is highlighted with a magenta border. Both panes scroll independently and show a scrollbar when content overflows.
 
+Tree nodes use disclosure icons to communicate expand/collapse state and whether children have been loaded from the database:
+
+| Icon | Meaning |
+|------|---------|
+| ▶ | Collapsed, children already loaded |
+| ▼ | Expanded, children already loaded |
+| ▷ | Collapsed, children not yet loaded |
+| ▽ | Expanded, children not yet loaded |
+
 ### Key Bindings
 
 | Key | Action |
 |-----|--------|
 | `j` / `Down` | Move cursor down (tree) or scroll down (detail) |
 | `k` / `Up` | Move cursor up (tree) or scroll up (detail) |
+| `l` / `Right` | **Tree:** expand collapsed node → descend into expanded node → select leaf & switch to detail. **Detail:** no-op |
+| `h` / `Left` | **Tree:** collapse expanded node → jump to parent. **Detail:** switch focus back to tree |
 | `Tab` | Switch focus between tree and detail panes |
 | `Space` | Expand / collapse node |
 | `Enter` | Select record (show details in right pane) |
@@ -53,6 +64,8 @@ Use `Tab` to switch focus between panes. The focused pane is highlighted with a 
 By default the detail pane shows only the fields declared via `tree_fields` (or `:id` if none are configured). Press `f` to toggle **field mode** — this switches the detail pane to display every column in the model's database schema. Press `f` again to return to the configured view.
 
 The current mode is shown at the top of the detail pane ("Field mode: configured" or "Field mode: all columns"). Field mode is tracked per model class, so toggling on a `User` record won't affect how `Order` records are displayed.
+
+Boolean fields are rendered with visual indicators: `true` displays as a green ✓ and `false` as a red ✗.
 
 ### Configuring Models
 
@@ -123,7 +136,7 @@ Scopes work for both collection (`has_many`) and singular (`has_one`, `belongs_t
 | `tree_field` | — | Add a single field with keyword options (`label:`) |
 | `tree_children` | None | Associations expandable as tree children (batch) |
 | `tree_child` | — | Add a single child with options (`label:`, positional scope proc) |
-| `tree_label` | `-> (record) { "#{record.class.name} #{record.id}" }` | Custom label block for tree nodes and detail pane |
+| `tree_label` | `-> (record) { "#{record.class.name} ##{record.id}" }` | Custom label block for tree nodes and detail pane |
 
 Models **without** the mixin still appear in the tree if referenced as children of another model, using the defaults above.
 
@@ -223,6 +236,8 @@ end
 ### Pagination
 
 Large `has_many` associations are loaded in pages of `default_limit` records. When more records exist, a `[load more...]` node appears at the bottom of the group. Activate it with `Space` to load the next page.
+
+Once loaded, association groups show a record count in their label — e.g. `orders [3]` when all records are loaded, or `orders [25+]` when more pages remain. Singular associations (`has_one`, `belongs_to`) and unloaded groups show just the association name.
 
 ## Development
 

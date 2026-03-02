@@ -17,7 +17,7 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 ## Code style
 
 - Ruby >= 3.1, double-quoted strings everywhere
-- RuboCop with `NewCops: enable`, `Style/Documentation` disabled, `Metrics/*` cops excluded for `renderer.rb` and `cli.rb` (intentional — these files are inherently complex TUI code)
+- RuboCop with `NewCops: enable`, `Style/Documentation` disabled, `Metrics/*` cops excluded for `renderer.rb` and `tree_state.rb` (most cops), `cli.rb` (`MethodLength` only) — intentional, these files are inherently complex TUI code
 - `frozen_string_literal: true` in every `.rb` file
 - RSpec for tests (`bundle exec rspec`), RuboCop for linting (`bundle exec rubocop`)
 
@@ -30,7 +30,7 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 
 ## Dependencies
 
-Runtime: `activerecord >= 7.0`, `railties >= 7.0`, `tty-box`, `tty-screen`, `pastel`
+Runtime: `activerecord >= 7.0`, `railties >= 7.0`, `tty-box`, `tty-screen`, `pastel`, `strings-ansi`
 Dev: `rspec`, `rubocop`, `rake`, `irb`
 
 ## Commands
