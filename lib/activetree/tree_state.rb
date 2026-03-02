@@ -45,11 +45,26 @@ module ActiveTree
       elsif node.expandable?
         node.expanded = !node.expanded
         clamp_cursor
+        clamp_scroll
       end
     end
 
     def toggle_focus
       @focused_pane = @focused_pane == :tree ? :detail : :tree
+    end
+
+    def navigate_right
+      return if detail_focused?
+
+      navigate_right_in_tree
+    end
+
+    def navigate_left
+      if detail_focused?
+        @focused_pane = :tree
+      else
+        navigate_left_in_tree
+      end
     end
 
     def detail_focused?
@@ -91,6 +106,43 @@ module ActiveTree
 
     private
 
+    def navigate_right_in_tree
+      node = cursor_node
+      return unless node
+
+      if node.is_a?(LoadMoreNode)
+        node.activate!
+      elsif node.expandable? && !node.expanded
+        node.expanded = true
+      elsif node.expandable? && node.expanded && node.children.any?
+        move_down
+      elsif !node.expandable?
+        select_current
+        @focused_pane = :detail
+      end
+    end
+
+    def navigate_left_in_tree
+      node = cursor_node
+      return unless node
+
+      if node.expanded && node.expandable?
+        node.expanded = false
+        clamp_cursor
+        clamp_scroll
+      elsif node.parent
+        move_to_parent(node)
+      end
+    end
+
+    def move_to_parent(node)
+      parent_index = visible_nodes.index(node.parent)
+      return unless parent_index
+
+      @cursor_index = parent_index
+      adjust_scroll
+    end
+
     def adjust_scroll
       if cursor_index < scroll_offset
         @scroll_offset = cursor_index
@@ -102,6 +154,11 @@ module ActiveTree
     def clamp_cursor
       max = visible_nodes.size - 1
       @cursor_index = [cursor_index, max].min
+    end
+
+    def clamp_scroll
+      max_offset = [visible_nodes.size - visible_height, 0].max
+      @scroll_offset = [@scroll_offset, max_offset].min
     end
   end
 end

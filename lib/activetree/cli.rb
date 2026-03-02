@@ -46,6 +46,8 @@ module ActiveTree
     def dispatch(action, state)
       case action
       when :toggle_focus then state.toggle_focus
+      when :navigate_right then state.navigate_right
+      when :navigate_left then state.navigate_left
       when :move_up
         state.detail_focused? ? state.scroll_detail_up : state.move_up
       when :move_down

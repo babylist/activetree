@@ -4,12 +4,16 @@ module ActiveTree
   class InputHandler
     KEY_MAP = {
       "\e[A" => :move_up,
+      "k" => :move_up,
+      "j" => :move_down,
       "\e[B" => :move_down,
+      "\e[C" => :navigate_right,
+      "l" => :navigate_right,
+      "\e[D" => :navigate_left,
+      "h" => :navigate_left,
       " " => :toggle_expand,
       "\r" => :select,
       "q" => :quit,
-      "k" => :move_up,
-      "j" => :move_down,
       "r" => :make_root,
       "\t" => :toggle_focus
     }.freeze

@@ -88,6 +88,25 @@ RSpec.describe ActiveTree::TreeState do
         state_with_children.toggle_expand
         expect(state_with_children.root.expanded).to be true
       end
+
+      it "clamps scroll_offset when collapsing makes content fit in viewport" do
+        state_with_children.visible_height = 5
+        # Force a stale scroll_offset as if the user had scrolled down
+        state_with_children.instance_variable_set(:@scroll_offset, 3)
+        # Collapse the root — only 1 node remains, which fits in the viewport
+        state_with_children.toggle_expand
+        expect(state_with_children.scroll_offset).to eq(0)
+      end
+
+      it "clamps scroll_offset to partial overflow after collapse" do
+        state_with_children.visible_height = 1
+        state_with_children.instance_variable_set(:@scroll_offset, 5)
+        # Root expanded has 2 visible nodes (root + association group).
+        # With visible_height=1, max_offset = 2 - 1 = 1.
+        # After collapse only root remains, max_offset = 1 - 1 = 0.
+        state_with_children.toggle_expand
+        expect(state_with_children.scroll_offset).to eq(0)
+      end
     end
   end
 
@@ -118,6 +137,132 @@ RSpec.describe ActiveTree::TreeState do
       state.toggle_focus
       state.toggle_focus
       expect(state.focused_pane).to eq(:tree)
+    end
+  end
+
+  describe "#navigate_right" do
+    context "when detail pane is focused" do
+      it "is a no-op" do
+        state.toggle_focus
+        expect(state.focused_pane).to eq(:detail)
+        state.navigate_right
+        expect(state.focused_pane).to eq(:detail)
+      end
+    end
+
+    context "with an expandable tree" do
+      let(:reflection) { Struct.new(:macro).new(:has_many) }
+
+      let(:record_with_children) do
+        reflection_ref = reflection
+        klass = Class.new do
+          define_singleton_method(:name) { "Order" }
+          define_singleton_method(:reflect_on_association) { |name| reflection_ref if name == :items }
+          define_method(:id) { 1 }
+          include ActiveTree::Model
+        end
+        klass.tree_children :items
+        klass.new
+      end
+
+      let(:nav_state) { described_class.new(root_record: record_with_children) }
+
+      it "expands a collapsed expandable node" do
+        nav_state.root.expanded = false
+        nav_state.navigate_right
+        expect(nav_state.root.expanded).to be true
+      end
+
+      it "moves to first child when node is expanded with children" do
+        # Root is expanded by default and has an AssociationGroupNode child for :items
+        expect(nav_state.root.expanded).to be true
+        expect(nav_state.visible_nodes.size).to be > 1
+        nav_state.navigate_right
+        expect(nav_state.cursor_index).to eq(1)
+      end
+
+      it "selects and focuses detail on a leaf node" do
+        # Collapse root so it's not expandable-looking, then use a plain record
+        # Use the simple state with a non-expandable root
+        state.navigate_right
+        expect(state.selected_record_node).to eq(state.root)
+        expect(state.focused_pane).to eq(:detail)
+      end
+    end
+
+    context "with a LoadMoreNode" do
+      it "activates the load more node" do
+        load_more = instance_double(ActiveTree::LoadMoreNode)
+        allow(load_more).to receive(:is_a?).with(ActiveTree::LoadMoreNode).and_return(true)
+        allow(load_more).to receive(:activate!)
+        allow(state).to receive(:cursor_node).and_return(load_more)
+
+        state.navigate_right
+        expect(load_more).to have_received(:activate!)
+      end
+    end
+  end
+
+  describe "#navigate_left" do
+    context "when detail pane is focused" do
+      it "focuses the tree pane" do
+        state.toggle_focus
+        expect(state.focused_pane).to eq(:detail)
+        state.navigate_left
+        expect(state.focused_pane).to eq(:tree)
+      end
+    end
+
+    context "with an expandable tree" do
+      let(:reflection) { Struct.new(:macro).new(:has_many) }
+
+      let(:record_with_children) do
+        reflection_ref = reflection
+        klass = Class.new do
+          define_singleton_method(:name) { "Order" }
+          define_singleton_method(:reflect_on_association) { |name| reflection_ref if name == :items }
+          define_method(:id) { 1 }
+          include ActiveTree::Model
+        end
+        klass.tree_children :items
+        klass.new
+      end
+
+      let(:nav_state) { described_class.new(root_record: record_with_children) }
+
+      it "collapses an expanded node" do
+        expect(nav_state.root.expanded).to be true
+        nav_state.navigate_left
+        expect(nav_state.root.expanded).to be false
+      end
+
+      it "clamps scroll_offset when collapsing via navigate_left" do
+        nav_state.visible_height = 5
+        nav_state.instance_variable_set(:@scroll_offset, 3)
+        nav_state.navigate_left
+        expect(nav_state.scroll_offset).to eq(0)
+      end
+
+      it "moves to parent when node is collapsed" do
+        # Root is expanded, so visible_nodes includes the AssociationGroupNode child
+        nav_state.move_down
+        expect(nav_state.cursor_index).to eq(1)
+
+        child = nav_state.cursor_node
+        expect(child.parent).to eq(nav_state.root)
+        # AssociationGroupNode is expandable but collapsed by default
+        expect(child.expanded).to be false
+
+        nav_state.navigate_left
+        expect(nav_state.cursor_index).to eq(0)
+      end
+    end
+
+    context "on root node" do
+      it "is a no-op" do
+        state.navigate_left
+        expect(state.cursor_index).to eq(0)
+      end
     end
   end
 

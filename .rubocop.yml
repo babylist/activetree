@@ -20,24 +20,29 @@ Metrics/BlockLength:
 Metrics/ClassLength:
   Exclude:
     - "lib/activetree/renderer.rb"
+    - "lib/activetree/tree_state.rb"
 
 Metrics/MethodLength:
   Exclude:
     - "lib/activetree/renderer.rb"
     - "lib/activetree/cli.rb"
+    - "lib/activetree/tree_state.rb"
 
 Metrics/AbcSize:
   Exclude:
     - "lib/activetree/renderer.rb"
+    - "lib/activetree/tree_state.rb"
 
 Metrics/CyclomaticComplexity:
   Exclude:
     - "lib/activetree/cli.rb"
     - "lib/activetree/renderer.rb"
+    - "lib/activetree/tree_state.rb"
 
 Metrics/PerceivedComplexity:
   Exclude:
     - "lib/activetree/renderer.rb"
+    - "lib/activetree/tree_state.rb"
 
 Metrics/ParameterLists:
   Exclude:
