@@ -63,6 +63,17 @@ RSpec.describe ActiveTree::RecordNode do
       pairs = node.detail_pairs
       expect(pairs).to eq([["id", 7], %w[status shipped], ["total", 99.99]])
     end
+
+    describe "#loaded?" do
+      it "is false before detail_pairs is accessed" do
+        expect(node).not_to be_loaded
+      end
+
+      it "is true after detail_pairs is accessed" do
+        node.detail_pairs
+        expect(node).to be_loaded
+      end
+    end
   end
 
   describe "with mixin but no fields configured" do

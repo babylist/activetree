@@ -8,6 +8,7 @@ module ActiveTree
       super(depth: depth, parent: parent, tree_state: tree_state)
       @record = record
       @children = nil
+      @detail_pairs = nil
     end
 
     def label
@@ -23,6 +24,10 @@ module ActiveTree
       return false if (@tree_state.root.record == record) && (self != @tree_state.root)
 
       children.any?
+    end
+
+    def loaded?
+      !@detail_pairs.nil?
     end
 
     def children

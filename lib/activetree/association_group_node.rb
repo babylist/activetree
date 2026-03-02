@@ -28,6 +28,10 @@ module ActiveTree
       true
     end
 
+    def loaded?
+      @loaded
+    end
+
     def children
       load_children! unless @loaded
       @children

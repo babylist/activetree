@@ -117,7 +117,11 @@ module ActiveTree
     end
 
     def expand_icon(node)
-      node.expanded ? "\u25bc " : "\u25b6 "
+      if node.loaded?
+        node.expanded ? "\u25bc " : "\u25b6 " # solid arrows
+      else
+        node.expanded ? "\u25bd " : "\u25b7 " # open arrows
+      end
     end
 
     def render_detail_lines(width, height)

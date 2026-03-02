@@ -56,6 +56,22 @@ RSpec.describe ActiveTree::AssociationGroupNode do
     end
   end
 
+  describe "#loaded?" do
+    it "is false before children are loaded" do
+      expect(node).not_to be_loaded
+    end
+
+    it "is true after load_children!" do
+      node.load_children!
+      expect(node).to be_loaded
+    end
+
+    it "is true after children are accessed (lazy load)" do
+      node.children
+      expect(node).to be_loaded
+    end
+  end
+
   describe "#children" do
     it "lazy-loads on first access" do
       children = node.children

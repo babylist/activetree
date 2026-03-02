@@ -27,6 +27,10 @@ module ActiveTree
       false
     end
 
+    def loaded?
+      false
+    end
+
     def visible_nodes
       nodes = [self]
       if expanded && expandable?

@@ -72,6 +72,53 @@ RSpec.describe ActiveTree::Renderer do
       end
     end
 
+    context "expand icon indicators" do
+      let(:reflection) { double("Reflection", macro: :has_many) }
+      let(:child_record) { double("ChildRecord", id: 1, class: double(name: "Item")) }
+
+      let(:scope) do
+        s = double("Scope")
+        allow(s).to receive(:offset).and_return(s)
+        allow(s).to receive(:limit).and_return(s)
+        allow(s).to receive(:to_a).and_return([child_record])
+        s
+      end
+
+      let(:record_class) { double("RecordClass", name: "Order") }
+
+      let(:record) do
+        obj = double("Record", id: 42, class: record_class)
+        allow(obj).to receive(:public_send).with(:items).and_return(scope)
+        allow(obj).to receive(:public_send).with(:id).and_return(42)
+        obj
+      end
+
+      before do
+        allow(record_class).to receive(:reflect_on_association).with(:items).and_return(reflection)
+        ActiveTree.config.model_configuration(record_class).configure_child(:items)
+      end
+
+      it "uses hollow arrow for unloaded collapsed node" do
+        output = renderer.render
+        expect(output).to include("\u25b7") # hollow right arrow (unloaded + collapsed)
+      end
+
+      it "uses solid down arrow for loaded expanded node" do
+        assoc_node = state.visible_nodes.find { |n| n.is_a?(ActiveTree::AssociationGroupNode) }
+        assoc_node.expanded = true
+        output = renderer.render
+        expect(output).to include("\u25bc") # solid down arrow (loaded + expanded)
+      end
+
+      it "uses solid right arrow for loaded collapsed node" do
+        assoc_node = state.visible_nodes.find { |n| n.is_a?(ActiveTree::AssociationGroupNode) }
+        assoc_node.load_children!
+        assoc_node.expanded = false
+        output = renderer.render
+        expect(output).to include("\u25b6") # solid right arrow (loaded + collapsed)
+      end
+    end
+
     context "when the detail title exceeds the pane width" do
       let(:record) do
         obj = double("Record", id: 42, class: double(name: "VeryLongModuleName::VeryLongClassName"))
