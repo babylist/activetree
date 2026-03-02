@@ -3,6 +3,7 @@
 require "tty-screen"
 require "tty-box"
 require "pastel"
+require "strings-ansi"
 
 module ActiveTree
   class Renderer

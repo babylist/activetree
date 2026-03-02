@@ -26,7 +26,7 @@ A tree-based admin interface for ActiveRecord, built as a Ruby gem. Currently a 
 - `spec.files` uses `git ls-files` — new files must be git-tracked before `gem build` will include them
 - Model discovery uses `config.after_initialize` (not `initializer`) because models aren't fully loaded during Rails initialization in development
 - `Gemfile.lock` is committed (Bundler recommends tracking it for gems and apps alike)
-- Several tty-* gems (`tty-table`, `tty-tree`, `tty-prompt`, `tty-cursor`) remain in the gemspec but are not currently imported — `pastel` and `strings-ansi` (`Strings::ANSI.sanitize` for ANSI-aware width measurement) are used directly but only declared transitively. Reconcile before publishing.
+- All runtime dependencies are explicitly declared in the gemspec — unused tty-* gems (`tty-table`, `tty-tree`, `tty-prompt`, `tty-cursor`) have been removed, and `pastel` + `strings-ansi` are now direct dependencies
 
 ## Dependencies
 

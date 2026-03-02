@@ -30,11 +30,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activerecord", ">= 7.0"
+  spec.add_dependency "pastel", "~> 0.8"
   spec.add_dependency "railties", ">= 7.0"
+  spec.add_dependency "strings-ansi", "~> 0.2"
   spec.add_dependency "tty-box", "~> 0.7"
-  spec.add_dependency "tty-cursor", "~> 0.7"
-  spec.add_dependency "tty-prompt", "~> 0.23"
   spec.add_dependency "tty-screen", "~> 0.8"
-  spec.add_dependency "tty-table", "~> 0.12"
-  spec.add_dependency "tty-tree", "~> 0.4"
 end
