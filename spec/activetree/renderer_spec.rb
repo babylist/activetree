@@ -50,6 +50,28 @@ RSpec.describe ActiveTree::Renderer do
       expect(output).to start_with("\e[H")
     end
 
+    context "when tree pane is focused" do
+      it "uses thick border for tree and light for detail" do
+        expect(TTY::Box).to receive(:frame)
+          .with(hash_including(border: :thick)).once.ordered.and_call_original
+        expect(TTY::Box).to receive(:frame)
+          .with(hash_including(border: :light)).once.ordered.and_call_original
+        renderer.render
+      end
+    end
+
+    context "when detail pane is focused" do
+      before { state.toggle_focus }
+
+      it "uses light border for tree and thick for detail" do
+        expect(TTY::Box).to receive(:frame)
+          .with(hash_including(border: :light)).once.ordered.and_call_original
+        expect(TTY::Box).to receive(:frame)
+          .with(hash_including(border: :thick)).once.ordered.and_call_original
+        renderer.render
+      end
+    end
+
     context "when the detail title exceeds the pane width" do
       let(:record) do
         obj = double("Record", id: 42, class: double(name: "VeryLongModuleName::VeryLongClassName"))

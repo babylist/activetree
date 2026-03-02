@@ -46,12 +46,13 @@ module ActiveTree
 
     def build_tree_box(lines)
       border_style = @state.tree_focused? ? { fg: :magenta } : { fg: :bright_black }
+      border_type = @state.tree_focused? ? :thick : :light
       TTY::Box.frame(
         top: 2,
         left: 0,
         width: @tree_w,
         height: @content_h + 2,
-        border: :light,
+        border: border_type,
         style: { border: border_style }
       ) { lines.join("\n") }
     end
@@ -60,12 +61,13 @@ module ActiveTree
       detail_title = "[#{@state.selected_record_node&.class_label}] #{@state.selected_record_node&.label}"
       detail_title = truncate(detail_title, @detail_w - 4)
       border_style = @state.detail_focused? ? { fg: :magenta } : { fg: :bright_black }
+      border_type = @state.detail_focused? ? :thick : :light
       TTY::Box.frame(
         top: 2,
         left: @tree_w,
         width: @detail_w,
         height: @content_h + 2,
-        border: :light,
+        border: border_type,
         style: { border: border_style },
         title: { top_left: " #{detail_title} " }
       ) { lines.join("\n") }
