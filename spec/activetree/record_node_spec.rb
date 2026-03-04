@@ -92,6 +92,58 @@ RSpec.describe ActiveTree::RecordNode do
     end
   end
 
+  describe "when a field raises an error" do
+    let(:record_class) do
+      Class.new do
+        def self.name
+          "Order"
+        end
+
+        def self.column_names
+          %w[id status total]
+        end
+
+        def id
+          7
+        end
+
+        def status
+          "shipped"
+        end
+
+        def total
+          raise "boom"
+        end
+
+        include ActiveTree::Model
+      end
+    end
+
+    let(:record) do
+      instance = record_class.new
+      record_class.tree_fields :id, :status, :total
+      instance
+    end
+
+    let(:node) { described_class.new(record: record, tree_state: tree_state) }
+
+    it "captures the exception in detail_pairs" do
+      pairs = node.detail_pairs
+      expect(pairs[0]).to eq(["id", 7])
+      expect(pairs[1]).to eq(%w[status shipped])
+      expect(pairs[2].first).to eq("total")
+      expect(pairs[2].last).to be_a(RuntimeError)
+    end
+
+    it "captures the exception in all_columns_detail_pairs" do
+      pairs = node.all_columns_detail_pairs
+      expect(pairs[0]).to eq(["id", 7])
+      expect(pairs[1]).to eq(%w[status shipped])
+      expect(pairs[2].first).to eq("total")
+      expect(pairs[2].last).to be_a(RuntimeError)
+    end
+  end
+
   describe "with mixin but no fields configured" do
     let(:record_class) do
       Class.new do

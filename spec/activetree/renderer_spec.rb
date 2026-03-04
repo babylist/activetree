@@ -187,6 +187,41 @@ RSpec.describe ActiveTree::Renderer do
       end
     end
 
+    context "when a field value is an exception" do
+      let(:record_class) do
+        Class.new do
+          def self.name
+            "Widget"
+          end
+
+          def self.column_names
+            %w[id broken_field]
+          end
+
+          def id
+            1
+          end
+
+          def broken_field
+            raise NoMethodError, "undefined method"
+          end
+
+          include ActiveTree::Model
+        end
+      end
+
+      let(:record) do
+        klass = record_class
+        klass.tree_fields :id, :broken_field
+        klass.new
+      end
+
+      it "renders the exception class name in red" do
+        output = renderer.render
+        expect(output).to include("NoMethodError")
+      end
+    end
+
     it "includes 'f fields' in the help bar" do
       expect(output).to include("f fields")
     end

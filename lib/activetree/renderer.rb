@@ -154,6 +154,8 @@ module ActiveTree
       value_str = case value
                   when true, false
                     value ? @pastel.green("\u2713") : @pastel.red("\u2717")
+                  when StandardError
+                    @pastel.red(value.class.name)
                   else
                     truncate(value.to_s, width - 18)
                   end
