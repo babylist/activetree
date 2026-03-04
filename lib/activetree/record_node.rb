@@ -45,13 +45,23 @@ module ActiveTree
 
     def detail_pairs
       @detail_pairs ||= detail_fields.map do |field|
-        [field.label, record.public_send(field.name)]
+        value = begin
+          record.public_send(field.name)
+        rescue StandardError => e
+          e
+        end
+        [field.label, value]
       end
     end
 
     def all_columns_detail_pairs
       @all_columns_detail_pairs ||= record.class.column_names.map do |col|
-        [col, record.public_send(col)]
+        value = begin
+          record.public_send(col)
+        rescue StandardError => e
+          e
+        end
+        [col, value]
       end
     end
 
