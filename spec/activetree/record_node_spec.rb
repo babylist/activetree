@@ -4,7 +4,7 @@ require "active_support/concern"
 
 RSpec.describe ActiveTree::RecordNode do
   let(:tree_state) do
-    root_node = double("RootNode", record: double("RootRecord"))
+    root_node = double("RootNode", record: double("RootRecord"), record?: true)
     double("TreeState", root: root_node)
   end
 
@@ -67,7 +67,7 @@ RSpec.describe ActiveTree::RecordNode do
     describe "#all_columns_detail_pairs" do
       it "returns pairs for every column in schema order" do
         pairs = node.all_columns_detail_pairs
-        expect(pairs).to eq([["id", 7], ["status", "shipped"], ["total", 99.99]])
+        expect(pairs).to eq([["id", 7], %w[status shipped], ["total", 99.99]])
       end
 
       it "is memoized" do

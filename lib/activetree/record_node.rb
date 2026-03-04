@@ -22,7 +22,7 @@ module ActiveTree
 
     def expandable?
       # Can only expand root record if root node
-      return false if (@tree_state.root.record == record) && (self != @tree_state.root)
+      return false if @tree_state.root.record? && @tree_state.root.record == record && self != @tree_state.root
 
       children.any?
     end

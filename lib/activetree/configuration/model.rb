@@ -29,6 +29,8 @@ module ActiveTree
 
       def label(instance)
         @label_block&.call(instance)
+      rescue StandardError
+        "Record"
       end
 
       def configure_field(name, **kwargs)

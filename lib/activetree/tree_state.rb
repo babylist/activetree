@@ -6,25 +6,51 @@ module ActiveTree
                 :focused_pane, :detail_scroll_offset
     attr_accessor :visible_height, :detail_content_height
 
-    def initialize(root_record:)
-      @root = RecordNode.new(record: root_record, tree_state: self)
-      @root.expanded = true
+    def initialize(root_record: nil)
+      @root = nil
       @cursor_index = 0
       @scroll_offset = 0
       @visible_height = 20
-      @selected_record_node = @root
+      @selected_record_node = nil
       @focused_pane = :tree
       @detail_scroll_offset = 0
       @detail_content_height = 0
       @field_modes = {}
+
+      set_root_record(root_record) if root_record
+    end
+
+    def empty?
+      @root.nil?
     end
 
     def visible_nodes
+      return [] if empty?
+
       root.visible_nodes
     end
 
     def cursor_node
+      return nil if empty?
+
       visible_nodes[cursor_index]
+    end
+
+    def set_root_record(record)
+      @root = RecordNode.new(record: record, tree_state: self)
+      @root.expanded = true
+      @selected_record_node = @root
+      @cursor_index = 0
+      @scroll_offset = 0
+      @detail_scroll_offset = 0
+    end
+
+    def set_root_node(node)
+      @root = node
+      @selected_record_node = nil
+      @cursor_index = 0
+      @scroll_offset = 0
+      @detail_scroll_offset = 0
     end
 
     def move_up
@@ -119,12 +145,7 @@ module ActiveTree
       node = selected_record_node
       return unless node.is_a?(RecordNode)
 
-      @root = RecordNode.new(record: node.record, tree_state: self)
-      @root.expanded = true
-      @selected_record_node = @root
-      @cursor_index = 0
-      @scroll_offset = 0
-      @detail_scroll_offset = 0
+      set_root_record(node.record)
     end
 
     private

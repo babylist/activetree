@@ -12,15 +12,15 @@ module ActiveTree
     end
 
     def expandable?
-      raise NotImplementedError, "#{self.class}#expandable?"
+      raise "#{self.class}#expandable? not implemented"
     end
 
     def children
-      raise NotImplementedError, "#{self.class}#children"
+      raise "#{self.class}#children not implemented"
     end
 
     def label
-      raise NotImplementedError, "#{self.class}#label"
+      raise "#{self.class}#label not implemented"
     end
 
     def record?

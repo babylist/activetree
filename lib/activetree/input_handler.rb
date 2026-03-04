@@ -2,6 +2,8 @@
 
 module ActiveTree
   class InputHandler
+    include CharReader
+
     KEY_MAP = {
       "\e[A" => :move_up,
       "k" => :move_up,
@@ -16,7 +18,8 @@ module ActiveTree
       "q" => :quit,
       "r" => :make_root,
       "\t" => :toggle_focus,
-      "f" => :toggle_field_mode
+      "f" => :toggle_field_mode,
+      "s" => :open_query_dialog
     }.freeze
 
     def initialize(input: $stdin)
@@ -28,32 +31,6 @@ module ActiveTree
       return nil unless char
 
       KEY_MAP[char]
-    end
-
-    private
-
-    def read_char
-      @input.raw(min: 1) do |io|
-        char = io.getc
-        return nil unless char
-        return read_escape_sequence(char, io) if char == "\e"
-
-        char
-      end
-    end
-
-    def read_escape_sequence(char, io)
-      second = safe_read(io)
-      third = safe_read(io)
-      return "#{char}#{second}#{third}" if second
-
-      char
-    end
-
-    def safe_read(io)
-      io.read_nonblock(1)
-    rescue StandardError
-      nil
     end
   end
 end
