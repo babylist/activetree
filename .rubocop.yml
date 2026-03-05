@@ -30,7 +30,7 @@ Metrics/MethodLength:
     - "lib/activetree/tree_state.rb"
     - "lib/activetree/dialog_input_handler.rb"
     - "lib/activetree/dialog_renderer.rb"
-    - "lib/activetree/query_dialog.rb"
+    - "lib/activetree/root_query.rb"
 
 Metrics/AbcSize:
   Exclude:

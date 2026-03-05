@@ -14,7 +14,8 @@ RSpec.describe ActiveTree::Renderer do
     obj
   end
 
-  let(:state) { ActiveTree::TreeState.new(root_record: record) }
+  let(:root_node) { ActiveTree::RecordNode.new(record: record) }
+  let(:state) { ActiveTree::TreeState.new(root_node:) }
   let(:renderer) { described_class.new(state) }
 
   before do

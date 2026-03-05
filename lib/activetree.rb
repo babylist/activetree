@@ -23,6 +23,7 @@ module ActiveTree
   autoload :DialogInputHandler, "activetree/dialog_input_handler"
   autoload :DialogRenderer, "activetree/dialog_renderer"
   autoload :QueryDialog, "activetree/query_dialog"
+  autoload :RootQuery, "activetree/root_query"
 
   class << self
     def config

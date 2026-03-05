@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "active_support/core_ext/string/inflections"
-
 module ActiveTree
   class CLI
     DISPATCH = {
@@ -32,15 +30,12 @@ module ActiveTree
       dialog_input = DialogInputHandler.new
 
       # Try to resolve root from CLI args
-      if @argv.size >= 2
-        record = resolve_root_record
-        state.set_root_record(record) if record
-      end
+      apply_query_result(RootQuery.new(@argv[0], @argv[1]), state) if @argv.size >= 2
 
       begin
         enter_alternate_screen
         if state.empty?
-          # Fall through to query dialog if no root record was resolved from args
+          # Fall through to query dialog if no root node was resolved from args
           open_query_dialog(state, renderer, dialog_input)
           return unless state.root
         end
@@ -79,8 +74,7 @@ module ActiveTree
         return if dialog.cancelled?
 
         begin
-          result = dialog.execute
-          apply_query_result(result, state)
+          apply_query_result(dialog.root_query, state)
           return
         rescue ArgumentError => e
           dialog.error_message = e.message
@@ -119,51 +113,14 @@ module ActiveTree
       end
     end
 
-    def apply_query_result(result, state)
-      if result[:record]
-        state.set_root_record(result[:record])
-      elsif result[:relation]
-        node = QueryResultsNode.new(
-          relation: result[:relation],
-          query_description: result[:description],
-          tree_state: state
-        )
-        state.set_root_node(node)
-      end
+    def apply_query_result(root_query, state)
+      state.set_root_node(root_query.as_tree_node)
     end
 
     def reset_dialog_for_retry(dialog)
       # Reset submitted/cancelled state so dialog can be re-shown
       dialog.instance_variable_set(:@submitted, false)
       dialog.instance_variable_set(:@cancelled, false)
-    end
-
-    def resolve_root_record
-      validate_argv!
-      klass = resolve_model(@argv[0])
-      find_record(klass, @argv[1])
-    end
-
-    def validate_argv!
-      return if @argv.size >= 2
-
-      puts "Usage: activetree <ModelName> <id>"
-      puts "  e.g. activetree User 42"
-    end
-
-    def resolve_model(model_name)
-      model_name.constantize
-    rescue NameError
-      puts "Error: model '#{model_name}' not found"
-      nil
-    end
-
-    def find_record(klass, record_id)
-      relation = klass&.unscoped
-      return nil unless relation
-
-      relation = relation.merge(ActiveTree.config.global_scope) if ActiveTree.config.global_scope
-      relation.find_by(id: record_id)
     end
 
     def enter_alternate_screen

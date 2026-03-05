@@ -4,7 +4,7 @@ module ActiveTree
   class QueryResultsNode < ListNode
     attr_reader :query_description
 
-    def initialize(relation:, query_description:, tree_state:)
+    def initialize(relation:, query_description:, tree_state: nil)
       super(relation:, tree_state: tree_state, depth: 0)
 
       @query_description = query_description
