@@ -384,6 +384,56 @@ RSpec.describe ActiveTree::TreeState do
     end
   end
 
+  describe "#empty?" do
+    it "returns true when initialized without root_record" do
+      empty_state = described_class.new
+      expect(empty_state.empty?).to be true
+    end
+
+    it "returns false when root_record is provided" do
+      expect(state.empty?).to be false
+    end
+  end
+
+  describe "#set_root_record" do
+    it "sets root and resets cursor/scroll" do
+      other_record = double("Record", id: 99, class: double(name: "Order"))
+      state.instance_variable_set(:@cursor_index, 5)
+      state.instance_variable_set(:@scroll_offset, 3)
+      state.set_root_record(other_record)
+      expect(state.root.record).to eq(other_record)
+      expect(state.cursor_index).to eq(0)
+      expect(state.scroll_offset).to eq(0)
+    end
+  end
+
+  describe "#set_root_node" do
+    it "sets root to arbitrary node and resets cursor/scroll" do
+      node = double("Node")
+      state.instance_variable_set(:@cursor_index, 5)
+      state.instance_variable_set(:@scroll_offset, 3)
+      state.set_root_node(node)
+      expect(state.root).to eq(node)
+      expect(state.cursor_index).to eq(0)
+      expect(state.scroll_offset).to eq(0)
+      expect(state.selected_record_node).to be_nil
+    end
+  end
+
+  describe "#visible_nodes when empty" do
+    it "returns empty array" do
+      empty_state = described_class.new
+      expect(empty_state.visible_nodes).to eq([])
+    end
+  end
+
+  describe "#cursor_node when empty" do
+    it "returns nil" do
+      empty_state = described_class.new
+      expect(empty_state.cursor_node).to be_nil
+    end
+  end
+
   describe "#select_current resets detail scroll" do
     it "resets detail_scroll_offset to 0" do
       state.detail_content_height = 30

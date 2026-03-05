@@ -227,6 +227,32 @@ RSpec.describe ActiveTree::Renderer do
       expect(output).to include("f fields")
     end
 
+    it "includes 's search' in the help bar" do
+      expect(output).to include("s search")
+    end
+
+    context "when state is empty" do
+      let(:state) { ActiveTree::TreeState.new }
+
+      it "still render (no error, includes header)" do
+        expect(renderer.render).to include("ActiveTree")
+      end
+    end
+
+    context "with dialog overlay" do
+      let(:dialog) do
+        ActiveTree::Dialog.new(
+          title: "Query",
+          fields: [ActiveTree::DialogField.new(name: :q, label: "Query", value: "")]
+        )
+      end
+
+      it "includes dialog content in the output" do
+        output = renderer.render(dialog: dialog)
+        expect(output).to include("Query")
+      end
+    end
+
     context "when the detail title exceeds the pane width" do
       let(:record) do
         obj = double("Record", id: 42, class: double(name: "VeryLongModuleName::VeryLongClassName"))

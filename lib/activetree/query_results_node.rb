@@ -5,8 +5,8 @@ module ActiveTree
     attr_reader :query_description
 
     def initialize(relation:, query_description:, tree_state:)
-      super(tree_state: tree_state, depth: 0)
-      @relation = relation
+      super(relation:, tree_state: tree_state, depth: 0)
+
       @query_description = query_description
       self.expanded = true
     end

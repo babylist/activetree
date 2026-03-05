@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
+require "active_record"
 module ActiveTree
   class ListNode < TreeNode
-    def initialize(tree_state:, depth: 0, parent: nil)
-      super
+    def initialize(tree_state:, depth: 0, parent: nil, relation: nil)
+      super(tree_state:, depth:, parent:)
       @children = nil
       @loaded = false
       @offset = 0
       @has_more = false
+      @relation = relation
     end
 
     def expandable?
@@ -39,7 +41,7 @@ module ActiveTree
     end
 
     def base_relation
-      raise "#{self.class}#base_relation not implemented"
+      @relation || ActiveRecord::Relation.new(ActiveRecord::Base).none
     end
 
     def count_label

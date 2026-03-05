@@ -5,7 +5,7 @@ module ActiveTree
     attr_reader :record, :association_name, :reflection
 
     def initialize(record:, association_name:, reflection:, tree_state:, depth: 0, parent: nil)
-      super(tree_state: tree_state, depth: depth, parent: parent)
+      super(relation: nil, tree_state: tree_state, depth: depth, parent: parent)
       @record = record
       @association_name = association_name
       @reflection = reflection
