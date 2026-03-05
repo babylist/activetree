@@ -19,7 +19,7 @@ module ActiveTree
     def render
       compute_layout
       @state.visible_height = @content_h
-      +"\e[H\e[J" << render_frame
+      +"\e[?2026h\e[H\e[J" << render_frame << "\e[?2026l"
     end
 
     private

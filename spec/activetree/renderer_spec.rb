@@ -46,8 +46,9 @@ RSpec.describe ActiveTree::Renderer do
       expect(output).to include("[User] User #42")
     end
 
-    it "starts with cursor home escape sequence" do
-      expect(output).to start_with("\e[H")
+    it "starts with synchronized output and cursor home escape sequence" do
+      expect(output).to start_with("\e[?2026h\e[H")
+      expect(output).to end_with("\e[?2026l")
     end
 
     context "when tree pane is focused" do
