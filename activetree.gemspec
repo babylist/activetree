@@ -3,7 +3,7 @@
 require_relative "lib/activetree/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "activetree"
+  spec.name = "rails-activetree"
   spec.version = ActiveTree::VERSION
   spec.authors = ["Alex Ford"]
   spec.email = ["alex.ford@babylist.com"]
