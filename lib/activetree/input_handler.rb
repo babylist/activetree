@@ -15,11 +15,11 @@ module ActiveTree
       "h" => :navigate_left,
       " " => :toggle_expand,
       "\r" => :select,
-      "q" => :quit,
+      "\x03" => :quit,
       "r" => :make_root,
       "\t" => :toggle_focus,
       "f" => :toggle_field_mode,
-      "s" => :open_query_dialog
+      "q" => :open_query_dialog
     }.freeze
 
     def initialize(input: $stdin)

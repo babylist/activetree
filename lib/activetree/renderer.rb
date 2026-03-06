@@ -110,7 +110,7 @@ module ActiveTree
 
     def positioned_footer
       help = " \u2191\u2193 navigate  \u2190\u2192/Space open/close  Tab focus  Enter select  " \
-             "f fields  r root  s search  q quit "
+             "f fields  r root  q query  Ctrl-C quit "
       "\e[#{@content_h + 5};1H#{@pastel.magenta.inverse(help.center(@width))}"
     end
 

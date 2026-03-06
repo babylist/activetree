@@ -63,12 +63,12 @@ Tree nodes use disclosure icons to communicate expand/collapse state and whether
 | `Enter` | Select record (show details in right pane) |
 | `f` | Toggle field mode (configured fields vs. all columns) |
 | `r` | Make selected record the new root |
-| `s` | Open query dialog (search for records) |
-| `q` | Quit |
+| `q` | Open query dialog |
+| `Ctrl-C` | Quit |
 
 ### Query Mode
 
-Press `s` at any time (or launch with no arguments) to open the query dialog. The dialog presents two fields:
+Press `q` at any time (or launch with no arguments) to open the query dialog. The dialog presents two fields:
 
 - **Model class** — the ActiveRecord model name (e.g. `User`, `Order`)
 - **Query** — a numeric ID or an ActiveRecord DSL expression (e.g. `42`, `where(active: true)`, `where(status: 'pending').order(:created_at)`)

@@ -228,8 +228,8 @@ RSpec.describe ActiveTree::Renderer do
       expect(output).to include("f fields")
     end
 
-    it "includes 's search' in the help bar" do
-      expect(output).to include("s search")
+    it "includes 'q query' in the help bar" do
+      expect(output).to include("q query")
     end
 
     context "when state is empty" do
