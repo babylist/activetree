@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    activetree (0.1.0)
+    rails-activetree (0.1.0.pre1)
       activerecord (>= 7.0)
       pastel (~> 0.8)
       railties (>= 7.0)
@@ -203,8 +203,8 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  activetree!
   irb
+  rails-activetree!
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop (~> 1.21)
