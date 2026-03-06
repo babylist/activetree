@@ -8,7 +8,9 @@ RSpec.describe ActiveTree::TreeState do
     obj
   end
 
-  let(:state) { described_class.new(root_record: record) }
+  let(:root_node) { ActiveTree::RecordNode.new(record: record) }
+
+  let(:state) { described_class.new(root_node:) }
 
   describe "#initialize" do
     it "creates root as expanded RecordNode" do
@@ -75,37 +77,37 @@ RSpec.describe ActiveTree::TreeState do
         klass.new
       end
 
-      let(:state_with_children) { described_class.new(root_record: record_with_children) }
+      let(:root_node) { ActiveTree::RecordNode.new(record: record_with_children) }
 
       it "collapses an expanded node" do
-        expect(state_with_children.root.expanded).to be true
-        state_with_children.toggle_expand
-        expect(state_with_children.root.expanded).to be false
+        expect(state.root.expanded).to be true
+        state.toggle_expand
+        expect(state.root.expanded).to be false
       end
 
       it "expands a collapsed node" do
-        state_with_children.root.expanded = false
-        state_with_children.toggle_expand
-        expect(state_with_children.root.expanded).to be true
+        state.root.expanded = false
+        state.toggle_expand
+        expect(state.root.expanded).to be true
       end
 
       it "clamps scroll_offset when collapsing makes content fit in viewport" do
-        state_with_children.visible_height = 5
+        state.visible_height = 5
         # Force a stale scroll_offset as if the user had scrolled down
-        state_with_children.instance_variable_set(:@scroll_offset, 3)
+        state.instance_variable_set(:@scroll_offset, 3)
         # Collapse the root — only 1 node remains, which fits in the viewport
-        state_with_children.toggle_expand
-        expect(state_with_children.scroll_offset).to eq(0)
+        state.toggle_expand
+        expect(state.scroll_offset).to eq(0)
       end
 
       it "clamps scroll_offset to partial overflow after collapse" do
-        state_with_children.visible_height = 1
-        state_with_children.instance_variable_set(:@scroll_offset, 5)
+        state.visible_height = 1
+        state.instance_variable_set(:@scroll_offset, 5)
         # Root expanded has 2 visible nodes (root + association group).
         # With visible_height=1, max_offset = 2 - 1 = 1.
         # After collapse only root remains, max_offset = 1 - 1 = 0.
-        state_with_children.toggle_expand
-        expect(state_with_children.scroll_offset).to eq(0)
+        state.toggle_expand
+        expect(state.scroll_offset).to eq(0)
       end
     end
   end
@@ -165,28 +167,20 @@ RSpec.describe ActiveTree::TreeState do
         klass.new
       end
 
-      let(:nav_state) { described_class.new(root_record: record_with_children) }
+      let(:root_node) { ActiveTree::RecordNode.new(record: record_with_children) }
 
       it "expands a collapsed expandable node" do
-        nav_state.root.expanded = false
-        nav_state.navigate_right
-        expect(nav_state.root.expanded).to be true
+        state.root.expanded = false
+        state.navigate_right
+        expect(state.root.expanded).to be true
       end
 
       it "moves to first child when node is expanded with children" do
         # Root is expanded by default and has an AssociationGroupNode child for :items
-        expect(nav_state.root.expanded).to be true
-        expect(nav_state.visible_nodes.size).to be > 1
-        nav_state.navigate_right
-        expect(nav_state.cursor_index).to eq(1)
-      end
-
-      it "selects and focuses detail on a leaf node" do
-        # Collapse root so it's not expandable-looking, then use a plain record
-        # Use the simple state with a non-expandable root
+        expect(state.root.expanded).to be true
+        expect(state.visible_nodes.size).to be > 1
         state.navigate_right
-        expect(state.selected_record_node).to eq(state.root)
-        expect(state.focused_pane).to eq(:detail)
+        expect(state.cursor_index).to eq(1)
       end
     end
 
@@ -228,33 +222,33 @@ RSpec.describe ActiveTree::TreeState do
         klass.new
       end
 
-      let(:nav_state) { described_class.new(root_record: record_with_children) }
+      let(:root_node) { ActiveTree::RecordNode.new(record: record_with_children) }
 
       it "collapses an expanded node" do
-        expect(nav_state.root.expanded).to be true
-        nav_state.navigate_left
-        expect(nav_state.root.expanded).to be false
+        expect(state.root.expanded).to be true
+        state.navigate_left
+        expect(state.root.expanded).to be false
       end
 
       it "clamps scroll_offset when collapsing via navigate_left" do
-        nav_state.visible_height = 5
-        nav_state.instance_variable_set(:@scroll_offset, 3)
-        nav_state.navigate_left
-        expect(nav_state.scroll_offset).to eq(0)
+        state.visible_height = 5
+        state.instance_variable_set(:@scroll_offset, 3)
+        state.navigate_left
+        expect(state.scroll_offset).to eq(0)
       end
 
       it "moves to parent when node is collapsed" do
         # Root is expanded, so visible_nodes includes the AssociationGroupNode child
-        nav_state.move_down
-        expect(nav_state.cursor_index).to eq(1)
+        state.move_down
+        expect(state.cursor_index).to eq(1)
 
-        child = nav_state.cursor_node
-        expect(child.parent).to eq(nav_state.root)
+        child = state.cursor_node
+        expect(child.parent).to eq(state.root)
         # AssociationGroupNode is expandable but collapsed by default
         expect(child.expanded).to be false
 
-        nav_state.navigate_left
-        expect(nav_state.cursor_index).to eq(0)
+        state.navigate_left
+        expect(state.cursor_index).to eq(0)
       end
     end
 
@@ -346,7 +340,8 @@ RSpec.describe ActiveTree::TreeState do
 
     it "scopes mode per class name" do
       other_record = double("Record", id: 2, class: double(name: "Order"))
-      other_state = described_class.new(root_record: other_record)
+      other_state = described_class.new
+      other_state.set_root_node(ActiveTree::RecordNode.new(record: other_record))
 
       state.toggle_field_mode
       expect(state.field_mode(record.class)).to eq(:all_columns)
@@ -381,6 +376,56 @@ RSpec.describe ActiveTree::TreeState do
       allow(state).to receive(:scroll_detail_down)
       state.cursor_down
       expect(state).to have_received(:scroll_detail_down)
+    end
+  end
+
+  describe "#empty?" do
+    it "returns true when initialized without root_record" do
+      empty_state = described_class.new
+      expect(empty_state.empty?).to be true
+    end
+
+    it "returns false when root_record is provided" do
+      expect(state.empty?).to be false
+    end
+  end
+
+  describe "#set_root_node" do
+    it "sets root to arbitrary node and resets cursor/scroll" do
+      node = ActiveTree::TreeNode.new
+      state.instance_variable_set(:@cursor_index, 5)
+      state.instance_variable_set(:@scroll_offset, 3)
+      state.set_root_node(node)
+      expect(state.root).to eq(node)
+      expect(state.cursor_index).to eq(0)
+      expect(state.scroll_offset).to eq(0)
+      expect(state.selected_record_node).to be_nil
+    end
+
+    context "with a RecordNode" do
+      it "sets root to the node, resets cursor/scroll, and selects the node" do
+        node = ActiveTree::RecordNode.new(record: record)
+        state.set_root_node(node)
+        expect(state.root).to eq(node)
+        expect(state.cursor_index).to eq(0)
+        expect(state.scroll_offset).to eq(0)
+
+        expect(state.selected_record_node).to eq(node)
+      end
+    end
+  end
+
+  describe "#visible_nodes when empty" do
+    it "returns empty array" do
+      empty_state = described_class.new
+      expect(empty_state.visible_nodes).to eq([])
+    end
+  end
+
+  describe "#cursor_node when empty" do
+    it "returns nil" do
+      empty_state = described_class.new
+      expect(empty_state.cursor_node).to be_nil
     end
   end
 

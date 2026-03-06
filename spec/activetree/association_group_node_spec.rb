@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/concern"
+require_relative "../support/shared_examples/list_node"
 
 RSpec.describe ActiveTree::AssociationGroupNode do
   let(:tree_state) do
@@ -50,77 +51,28 @@ RSpec.describe ActiveTree::AssociationGroupNode do
     end
   end
 
-  describe "#expandable?" do
-    it "is always expandable" do
-      expect(node).to be_expandable
-    end
+  let(:relation) { scope }
+
+  let(:node_with_many_records) do
+    many_records = (1..26).map { |i| double("Record#{i}", id: i, class: double(name: "Item")) }
+    paginated_scope = double("PaginatedScope")
+    allow(paginated_scope).to receive(:offset).and_return(paginated_scope)
+    allow(paginated_scope).to receive(:limit).and_return(paginated_scope)
+    allow(paginated_scope).to receive(:to_a).and_return(many_records)
+
+    paginated_record = double("ParentRecord", id: 42)
+    allow(paginated_record).to receive(:public_send).with(:items).and_return(paginated_scope)
+
+    described_class.new(
+      record: paginated_record,
+      association_name: :items,
+      reflection: reflection,
+      tree_state: tree_state,
+      depth: 1
+    )
   end
 
-  describe "#loaded?" do
-    it "is false before children are loaded" do
-      expect(node).not_to be_loaded
-    end
-
-    it "is true after load_children!" do
-      node.load_children!
-      expect(node).to be_loaded
-    end
-
-    it "is true after children are accessed (lazy load)" do
-      node.children
-      expect(node).to be_loaded
-    end
-  end
-
-  describe "#children" do
-    it "lazy-loads on first access" do
-      children = node.children
-      expect(children.size).to eq(1)
-      expect(children.first).to be_a(ActiveTree::RecordNode)
-    end
-  end
-
-  describe "pagination" do
-    let(:many_records) do
-      (1..26).map { |i| double("Record#{i}", id: i, class: double(name: "Item")) }
-    end
-
-    let(:paginated_scope) do
-      s = double("PaginatedScope")
-      allow(s).to receive(:offset).and_return(s)
-      allow(s).to receive(:limit).and_return(s)
-      allow(s).to receive(:to_a).and_return(many_records)
-      s
-    end
-
-    let(:paginated_record) do
-      rec = double("ParentRecord", id: 42)
-      allow(rec).to receive(:public_send).with(:items).and_return(paginated_scope)
-      rec
-    end
-
-    let(:paginated_node) do
-      described_class.new(
-        record: paginated_record,
-        association_name: :items,
-        reflection: reflection,
-        tree_state: tree_state,
-        depth: 1
-      )
-    end
-
-    it "inserts LoadMoreNode when more records exist" do
-      paginated_node.load_children!
-      last_child = paginated_node.children.last
-      expect(last_child).to be_a(ActiveTree::LoadMoreNode)
-    end
-
-    it "limits to default_limit records" do
-      paginated_node.load_children!
-      record_nodes = paginated_node.children.select { |c| c.is_a?(ActiveTree::RecordNode) }
-      expect(record_nodes.size).to eq(25)
-    end
-  end
+  it_behaves_like "a ListNode"
 
   describe "collection with scope" do
     let(:scope_proc) { -> { where(active: true) } }

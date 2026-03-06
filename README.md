@@ -20,13 +20,19 @@ bundle install
 
 ### Launching the TUI
 
-ActiveTree browses a single root record and its association tree. Pass a model name and ID:
+ActiveTree browses a single root record and its association tree. Pass a model name and a query:
 
 ```bash
-# Within a Rails app
-
+# Within a Rails app — browse a specific record by ID
 bin/rails "activetree:tree[User,42]"
 bundle exec activetree User 42
+
+# Query with ActiveRecord DSL expressions
+bundle exec activetree User "where(active: true)"
+bundle exec activetree Order "where(status: 'pending').limit(10)"
+
+# No arguments — opens an interactive query dialog
+bundle exec activetree
 ```
 
 The TUI opens a full-screen split-pane interface:
@@ -57,7 +63,21 @@ Tree nodes use disclosure icons to communicate expand/collapse state and whether
 | `Enter` | Select record (show details in right pane) |
 | `f` | Toggle field mode (configured fields vs. all columns) |
 | `r` | Make selected record the new root |
-| `q` | Quit |
+| `q` | Open query dialog |
+| `Ctrl-C` | Quit |
+
+### Query Mode
+
+Press `q` at any time (or launch with no arguments) to open the query dialog. The dialog presents two fields:
+
+- **Model class** — the ActiveRecord model name (e.g. `User`, `Order`)
+- **Query** — a numeric ID or an ActiveRecord DSL expression (e.g. `42`, `where(active: true)`, `where(status: 'pending').order(:created_at)`)
+
+Use `Tab` to move between fields, `Enter` to submit, and `Esc` to cancel and return to the current tree.
+
+The results of the query become the root of the tree. If multiple results are returned, they are paginated according to the `default_limit` configuration.
+
+If the model isn't found or the query returns no results, an error message appears in the dialog.
 
 ### Field Mode
 
@@ -178,23 +198,6 @@ Model names are passed as strings because classes may not be loaded when the ini
 #### Merging with the Model Concern
 
 Both configuration styles write to the same underlying config. If a model is configured in an initializer _and_ includes `ActiveTree::Model`, the results merge — fields and children accumulate, and last-write-wins for any given name:
-
-```ruby
-# initializer
-ActiveTree.configure do
-  model "User" do
-    field :id
-    field :name, label: "First"
-  end
-end
-
-# model
-class User < ApplicationRecord
-  include ActiveTree::Model
-  tree_field :email
-  tree_field :name, label: "Full Name"  # overwrites initializer's label
-end
-```
 
 ### Global Options
 

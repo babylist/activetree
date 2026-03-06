@@ -14,12 +14,17 @@ module ActiveTree
     def initialize(tree_state)
       @state = tree_state
       @pastel = Pastel.new
+      @dialog_renderer = DialogRenderer.new
     end
 
-    def render
+    def render(dialog: nil)
       compute_layout
       @state.visible_height = @content_h
-      +"\e[?2026h\e[H\e[J" << render_frame << "\e[?2026l"
+      output = +"\e[?2026h\e[H\e[J"
+      output << (@state.empty? ? render_empty_frame : render_frame)
+      output << @dialog_renderer.render(dialog, @width, TTY::Screen.height) if dialog
+      output << "\e[?2026l"
+      output
     end
 
     private
@@ -41,6 +46,13 @@ module ActiveTree
         positioned_footer
     end
 
+    def render_empty_frame
+      top_border +
+        build_empty_tree_box +
+        build_empty_detail_box +
+        positioned_footer
+    end
+
     def top_border
       @pastel.magenta.bold("ActiveTree v#{ActiveTree::VERSION}\n") + @pastel.dim("#{app_name}\n")
     end
@@ -56,6 +68,17 @@ module ActiveTree
         border: border_type,
         style: { border: border_style }
       ) { lines.join("\n") }
+    end
+
+    def build_empty_tree_box
+      TTY::Box.frame(
+        top: 2,
+        left: 0,
+        width: @tree_w,
+        height: @content_h + 2,
+        border: :light,
+        style: { border: { fg: :bright_black } }
+      ) { "" }
     end
 
     def build_detail_box(lines)
@@ -74,8 +97,20 @@ module ActiveTree
       ) { lines.join("\n") }
     end
 
+    def build_empty_detail_box
+      TTY::Box.frame(
+        top: 2,
+        left: @tree_w,
+        width: @detail_w,
+        height: @content_h + 2,
+        border: :light,
+        style: { border: { fg: :bright_black } }
+      ) { "" }
+    end
+
     def positioned_footer
-      help = " \u2191\u2193 navigate  \u2190\u2192/Space open/close  Tab focus  Enter select  f fields  r root  q quit "
+      help = " \u2191\u2193 navigate  \u2190\u2192/Space open/close  Tab focus  Enter select  " \
+             "f fields  r root  q query  Ctrl-C quit "
       "\e[#{@content_h + 5};1H#{@pastel.magenta.inverse(help.center(@width))}"
     end
 
@@ -98,7 +133,9 @@ module ActiveTree
         line = @pastel.cyan(line) unless node.record?
 
         # italic if it is the root node
-        line = @pastel.italic(line) if node.record? && node.record == @state.root.record
+        if node.record? && @state.root.respond_to?(:record) && node.record == @state.root.record
+          line = @pastel.italic(line)
+        end
 
         # bold if selected (details visible)
         line = @pastel.bold(line) if node == @state.selected_record_node

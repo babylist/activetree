@@ -2,9 +2,9 @@
 
 module ActiveTree
   class TreeNode
-    attr_accessor :depth, :parent, :expanded
+    attr_accessor :depth, :parent, :expanded, :tree_state
 
-    def initialize(tree_state:, depth: 0, parent: nil)
+    def initialize(tree_state: nil, depth: 0, parent: nil)
       @depth = depth
       @parent = parent
       @expanded = false
@@ -12,15 +12,15 @@ module ActiveTree
     end
 
     def expandable?
-      raise NotImplementedError, "#{self.class}#expandable?"
+      raise "#{self.class}#expandable? not implemented"
     end
 
     def children
-      raise NotImplementedError, "#{self.class}#children"
+      raise "#{self.class}#children not implemented"
     end
 
     def label
-      raise NotImplementedError, "#{self.class}#label"
+      raise "#{self.class}#label not implemented"
     end
 
     def record?
@@ -29,6 +29,14 @@ module ActiveTree
 
     def loaded?
       false
+    end
+
+    def reset_depth(depth)
+      @depth = depth
+
+      # Using ivar directly to avoid eager-loading the entire object graph
+      # (@children is only present after explicitly being loaded)
+      @children&.each { |child| child.reset_depth(depth + 1) }
     end
 
     def visible_nodes

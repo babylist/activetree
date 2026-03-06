@@ -14,7 +14,8 @@ RSpec.describe ActiveTree::Renderer do
     obj
   end
 
-  let(:state) { ActiveTree::TreeState.new(root_record: record) }
+  let(:root_node) { ActiveTree::RecordNode.new(record: record) }
+  let(:state) { ActiveTree::TreeState.new(root_node:) }
   let(:renderer) { described_class.new(state) }
 
   before do
@@ -225,6 +226,32 @@ RSpec.describe ActiveTree::Renderer do
 
     it "includes 'f fields' in the help bar" do
       expect(output).to include("f fields")
+    end
+
+    it "includes 'q query' in the help bar" do
+      expect(output).to include("q query")
+    end
+
+    context "when state is empty" do
+      let(:state) { ActiveTree::TreeState.new }
+
+      it "still render (no error, includes header)" do
+        expect(renderer.render).to include("ActiveTree")
+      end
+    end
+
+    context "with dialog overlay" do
+      let(:dialog) do
+        ActiveTree::Dialog.new(
+          title: "Query",
+          fields: [ActiveTree::DialogField.new(name: :q, label: "Query", value: "")]
+        )
+      end
+
+      it "includes dialog content in the output" do
+        output = renderer.render(dialog: dialog)
+        expect(output).to include("Query")
+      end
     end
 
     context "when the detail title exceeds the pane width" do

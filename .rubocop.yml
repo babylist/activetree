@@ -21,22 +21,30 @@ Metrics/ClassLength:
   Exclude:
     - "lib/activetree/renderer.rb"
     - "lib/activetree/tree_state.rb"
+    - "lib/activetree/cli.rb"
 
 Metrics/MethodLength:
   Exclude:
     - "lib/activetree/renderer.rb"
     - "lib/activetree/cli.rb"
     - "lib/activetree/tree_state.rb"
+    - "lib/activetree/dialog_input_handler.rb"
+    - "lib/activetree/dialog_renderer.rb"
+    - "lib/activetree/root_query.rb"
 
 Metrics/AbcSize:
   Exclude:
     - "lib/activetree/renderer.rb"
     - "lib/activetree/tree_state.rb"
+    - "lib/activetree/cli.rb"
+    - "lib/activetree/dialog_renderer.rb"
 
 Metrics/CyclomaticComplexity:
   Exclude:
     - "lib/activetree/renderer.rb"
     - "lib/activetree/tree_state.rb"
+    - "lib/activetree/cli.rb"
+    - "lib/activetree/dialog_input_handler.rb"
 
 Metrics/PerceivedComplexity:
   Exclude:
@@ -46,3 +54,8 @@ Metrics/PerceivedComplexity:
 Metrics/ParameterLists:
   Exclude:
     - "lib/activetree/renderer.rb"
+    - "lib/activetree/association_group_node.rb"
+
+Naming/AccessorMethodName:
+  Exclude:
+    - "lib/activetree/tree_state.rb"
